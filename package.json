@@ -1,0 +1,35 @@
+{
+  "fullname": "BetterMediaBrowser",
+  "name": "bettermediabrowser",
+  "description": "Media Browser Extensions for MODX",
+  "author": "Chris Menzi <christoph.menzi@visions.ch>, Thomas Jakobi <office@treehillstudio.com>",
+  "private": true,
+  "version": "1.0.0",
+  "startYear": "2026",
+  "scripts": {
+    "bump": "node build.js",
+    "build:bump": "node build.js bump",
+    "build:scripts": "node build.js scripts",
+    "build:sass": "node build.js sass",
+    "build:images": "node build.js images",
+    "build:transport": "node build.js transport"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.6.1",
+    "chokidar-cli": "^3.0.0",
+    "cssnano": "^9.0.4",
+    "postcss": "^8.5.28",
+    "sass": "^1.104.1",
+    "terser": "^5.51.2"
+  },
+  "browserslist": [
+    "last 2 version",
+    "> 1%",
+    "maintained node versions",
+    "not dead"
+  ],
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "fsevents@2.3.3": true
+  }
+}

@@ -1,0 +1,111 @@
+@use "sass:meta";
+@use "sass:color";
+
+$treehillstudio-color: #cbd842;
+
+.bettermediabrowser-draggable {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.bettermediabrowser-drag-source {
+  opacity: .55;
+}
+
+.bettermediabrowser-drop-target {
+  background: #eef7fc !important;
+  box-shadow: inset 0 0 0 2px #3697cd;
+  border-radius: 2px;
+}
+
+.treehillstudio_window {
+  img {
+    width: 70%;
+    margin-top: 10px;
+
+    &.treehill-studio {
+      width: 85%;
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.treehillstudio_window {
+  a {
+    color: color.adjust($treehillstudio-color, $lightness: -10%);
+    text-decoration: none;
+
+    &:hover {
+      color: color.adjust($treehillstudio-color, $lightness: -25%);
+    }
+  }
+}
+
+.x-btn-icon.icon-search button:before {
+  content: "\f002";
+}
+
+.x-btn-text-icon button:before {
+  font-family: fontawesome;
+  font-size: 15px;
+  position: absolute;
+  left: 10px;
+  top: 3px;
+}
+
+.x-btn-text-icon button.icon-search:before {
+  font-size: 15px;
+  content: "\f002";
+}
+
+.x-btn-logo {
+  background: none;
+  border: none;
+  box-shadow: none;
+  opacity: 0.25;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  .x-btn-image {
+    height: 18px;
+    margin-right: 15px;
+    width: auto;
+    &.x-btn-image-visions {
+      height: 12px;
+    }
+    &.x-btn-image-treehillstudio {
+      height: 32px;
+      top: 3px;
+      position: relative;
+    }
+  }
+  &:hover, &:focus {
+    background: none;
+    border: none;
+    box-shadow: none;
+    opacity: 1;
+  }
+}
+
+.bettermediabrowser-search-thumb {
+  width: 56px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  img {
+    max-width: 56px;
+    max-height: 44px;
+    object-fit: contain;
+  }
+}
+
+.bettermediabrowser-search-open {
+  cursor: pointer;
+  font-size: 16px;
+}
