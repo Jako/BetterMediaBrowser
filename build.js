@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const runner = require('child_process');
-const {minify} = require('terser');
+const { minify } = require('terser');
 const sass = require('sass');
 const postcss = require('postcss');
 const autoprefixer = require('autoprefixer');
@@ -13,7 +13,8 @@ const version = packageJson.version;
 const currentYear = new Date().getFullYear();
 const startYear = parseInt(packageJson.startYear) || currentYear;
 const yearRange = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
-const dateStr = new Date().toISOString().split('T')[0];
+const dateStr = new Date().toISOString()
+    .split('T')[0];
 
 const copyrightRegex = new RegExp(`Copyright ${startYear}(-\\d{4})? by`, 'g');
 const copyrightReplace = `Copyright ${yearRange} by`;
@@ -41,7 +42,7 @@ function replaceInFile(filePath, regex, replacement, message = 'file') {
 // Helper: Ensure directory structure exists
 function ensureDirExists(dirPath) {
     if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, {recursive: true});
+        fs.mkdirSync(dirPath, { recursive: true });
     }
 }
 
@@ -54,19 +55,19 @@ function copyFile(src, dest) {
         return;
     }
     const targetDir = path.dirname(fullTarget);
-    ensureDirExists(targetDir)
+    ensureDirExists(targetDir);
     fs.copyFileSync(fullSource, fullTarget);
     console.log(`✓ Copied: ${src} -> ${dest}`);
 }
 
 // Helper: Copy folders recursively with an optional filter function
-async function copyFolderRecursive(src, dest, filterFn = () => true) {
+async function copyFolderRecursive(src, dest, filterFn = (fileName) => true) {
     if (!fs.existsSync(src)) {
         console.warn(`⚠ Source file not found for copy: ${src}`);
         return;
     }
     ensureDirExists(dest);
-    const entries = fs.readdirSync(src, {withFileTypes: true});
+    const entries = fs.readdirSync(src, { withFileTypes: true });
 
     for (let entry of entries) {
         const srcPath = path.join(src, entry.name);
@@ -74,7 +75,7 @@ async function copyFolderRecursive(src, dest, filterFn = () => true) {
 
         if (entry.isDirectory()) {
             await copyFolderRecursive(srcPath, destPath, filterFn);
-        } else if (filterFn(entry.name, srcPath)) {
+        } else if (filterFn(entry.name)) {
             fs.copyFileSync(srcPath, destPath);
             console.log(`✓ Copied: ${srcPath} -> ${destPath}`);
         }
@@ -84,7 +85,8 @@ async function copyFolderRecursive(src, dest, filterFn = () => true) {
 // Helper function to compile scripts
 async function compileScripts(files, dest, filename) {
     console.log('Compiling scripts...');
-    let combinedCode = files.map(f => fs.readFileSync(f, 'utf8')).join('\n');
+    let combinedCode = files.map(f => fs.readFileSync(f, 'utf8'))
+        .join('\n');
     const minified = await minify(combinedCode, {
         mangle: true,
         compress: true
@@ -98,13 +100,14 @@ async function compileScripts(files, dest, filename) {
 // Helper function to compile, autoprefix and minify Sass
 async function compileSass(src, intermediate, dest, filename) {
     console.log('Compiling Sass & processing CSS...');
-    const sassResult = sass.compile(src, {style: 'expanded'});
+    const sassResult = sass.compile(src, { style: 'expanded' });
     ensureDirExists(intermediate);
     fs.writeFileSync(path.join(intermediate, filename), sassResult.css, 'utf8');
     const postcssResult = await postcss([
         autoprefixer(),
-        cssnano({preset: ['default', {discardComments: {removeAll: true}}]})
-    ]).process(sassResult.css, {from: undefined});
+        cssnano({ preset: ['default', { discardComments: { removeAll: true } }] })
+    ])
+        .process(sassResult.css, { from: undefined });
     const finalCss = postcssResult.css + '\n' + banner;
     ensureDirExists(dest);
     filename = filename.replace(/(\.\w+)$/i, '.min$1');
@@ -137,7 +140,7 @@ async function taskBump() {
     replaceInFile(
         'core/components/bettermediabrowser/src/BetterMediaBrowser.php',
         /version = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
-        `version = '${versionFull}'`,
+        `version = '${version}'`,
         'version in'
     );
     replaceInFile(
@@ -149,7 +152,7 @@ async function taskBump() {
     replaceInFile(
         'core/components/bettermediabrowser/composer.json',
         /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
-        `"version": "${versionFull}"`,
+        `"version": "${version}"`,
         'version in'
     );
 }
@@ -158,7 +161,7 @@ async function taskCopy() {
     console.log('Copy files...');
     const copyFiles = [
         ['LICENSE.md', 'core/components/bettermediabrowser/docs/license.md'],
-        ['CHANGELOG.md', 'core/components/bettermediabrowser/docs/changelog.md']
+        ['CHANGELOG.md', 'core/components/bettermediabrowser/docs/changelog.md'],
     ];
     copyFiles.forEach(([source, destination]) => {
         if (source && destination) {
@@ -181,20 +184,22 @@ async function taskSass() {
         'src/sass/mgr/bettermediabrowser.scss',
         'src/css/mgr/',
         'assets/components/bettermediabrowser/css/mgr/',
-        'bettermediabrowser.css'
+        'bettermediabrowser.css',
     );
 }
 
 async function taskImages() {
     console.log('Copying images...');
-    const isImageFilter = (fileName) => /\.(png|jpg|gif|svg)$/i.test(fileName);
-    await copyFolderRecursive('src/img', 'assets/components/bettermediabrowser/img', isImageFilter);
+    const isImage = function (fileName) {
+        return  /\.(png|jpg|gif|svg)$/i.test(fileName);
+    };
+    await copyFolderRecursive('src/img', 'assets/components/bettermediabrowser/img', isImage);
 }
 
 async function taskTransport() {
     console.log('Creating transport package...');
     const phpScriptPath = path.resolve(__dirname, '_build/build.transport.php');
-    runner.exec("php " + phpScriptPath, function (err, phpResponse, stderr) {
+    runner.exec('php ' + phpScriptPath, function (err, phpResponse, stderr) {
         if (err) {
             console.log(err);
         }
@@ -217,7 +222,12 @@ if (action === 'bump') {
     taskTransport();
 } else {
     // Default: Beides ausführen
-    taskBump().then(() => taskScripts()).then(() => taskSass().then(() => taskCopy()).then(() => taskImages()).then(() => taskTransport()));
+    taskBump()
+        .then(() => taskScripts())
+        .then(() => taskSass())
+        .then(() => taskCopy())
+        .then(() => taskImages())
+        .then(() => taskTransport());
 }
 
 console.log('Done!');
