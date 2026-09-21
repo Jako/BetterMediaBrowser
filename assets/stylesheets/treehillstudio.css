@@ -262,10 +262,28 @@ html .md-footer-meta.md-typeset a:focus, html .md-footer-meta.md-typeset a:hover
     background-color: rgb(192, 48, 40);
 }
 
+html .md-footer-meta .md-footer-logo {
+    display: flex;
+}
+html .md-footer-meta .md-footer-logo .md-footer-logo__link {
+    display: inline-block;
+}
+
 html .md-footer-meta .md-footer-logo img {
     height: 40px;
     margin-top: 8px;
     width: auto;
+}
+
+html .md-footer-meta .md-footer-logo img.logo-visions {
+    height: 16px;
+    margin-top: 16px;
+    margin-right: 20px;
+}
+
+html .md-footer-meta .md-footer-logo img.logo-treehill-studio {
+    height: 40px;
+    margin-top: 8px;
 }
 
 .md-footer-logo {
