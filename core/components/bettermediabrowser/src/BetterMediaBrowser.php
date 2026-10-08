@@ -42,7 +42,7 @@ class BetterMediaBrowser
      * The version
      * @var string $version
      */
-    public $version = '1.0.0-pl';
+    public $version = '1.0.0';
 
     /**
      * The class options

@@ -10,6 +10,8 @@ const cssnano = require('cssnano');
 // Read package information dynamically from package.json
 const packageJson = require('./package.json');
 const version = packageJson.version;
+const phpversion = packageJson.phpversion;
+const modxversion = packageJson.modxversion;
 const currentYear = new Date().getFullYear();
 const startYear = parseInt(packageJson.startYear) || currentYear;
 const yearRange = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
@@ -28,13 +30,15 @@ let versionRelease = versionParts[1] || 'pl';
 let versionFull = versionNumber + '-' + versionRelease;
 
 // Helper: Replace string/regex in a file
-function replaceInFile(filePath, regex, replacement, message = 'file') {
+function replaceInFile(filePath, replacements, message = 'file') {
     if (!fs.existsSync(filePath)) {
         console.warn(`⚠ File not found: ${filePath}`);
         return;
     }
     let content = String(fs.readFileSync(filePath, 'utf8'));
-    content = content.replace(regex, replacement);
+    replacements.forEach(({ search, replace }) => {
+        content = content.replace(search, replace);
+    });
     fs.writeFileSync(filePath, content, 'utf8');
     console.log(`✓ Updated ${message}: ${filePath}`);
 }
@@ -89,7 +93,10 @@ async function compileScripts(files, dest, filename) {
         .join('\n');
     const minified = await minify(combinedCode, {
         mangle: true,
-        compress: true
+        compress: true,
+        format: {
+            comments: false,
+        },
     });
     const finalCode = banner + minified.code;
     ensureDirExists(dest);
@@ -123,38 +130,63 @@ async function taskBump() {
         'README.md',
     ];
     copyrightFiles.forEach(file => {
-        replaceInFile(file, copyrightRegex, copyrightReplace, 'copyright in');
+        replaceInFile(file, [{
+            search: copyrightRegex,
+            replace: copyrightReplace
+        }], 'copyright in');
     });
-    replaceInFile(
-        '_build/build.transport.php',
-        /PKG_VERSION = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
-        `PKG_VERSION = '${versionNumber}'`,
-        'version in'
-    );
-    replaceInFile(
-        '_build/build.transport.php',
-        /PKG_RELEASE = '.*?'/ig,
-        `PKG_RELEASE = '${versionRelease}'`,
-        'release in'
-    );
-    replaceInFile(
-        'core/components/bettermediabrowser/src/BetterMediaBrowser.php',
-        /version = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
-        `version = '${version}'`,
-        'version in'
-    );
-    replaceInFile(
-        'src/js/mgr/helper/api.js',
-        apiRegex,
-        apiReplace,
-        'daterange in'
-    );
-    replaceInFile(
+    replaceInFile('core/components/bettermediabrowser/src/BetterMediaBrowser.php', [{
+        search: /version = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
+        replace: `version = '${version}'`
+    }], 'version in');
+    const scriptFiles = [
+        'src/js/mgr/helper/api.js'
+    ];
+    scriptFiles.forEach(file => {
+        replaceInFile(file, [{
+            search: apiRegex,
+            replace: apiReplace
+        }], 'daterange in');
+    });
+    const docFiles = [
+        'zensical.toml',
+    ];
+    docFiles.forEach(file => {
+        replaceInFile(file, [{
+            search: apiRegex,
+            replace: apiReplace
+        }], 'daterange in');
+    });
+    replaceInFile('docs/index.md', [{
+        search: /[*-] MODX Revolution \d.\d.*/g,
+        replace: '* MODX Revolution ' + modxversion + '+'
+    }, {
+        search: /[*-] PHP (v)?\d.\d.*/g,
+        replace: '* PHP ' + phpversion + '+'
+    }], 'requirements in');
+    replaceInFile('_build/build.transport.php', [{
+        search: /PKG_VERSION = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
+        replace: `PKG_VERSION = '${versionNumber}'`
+    }, {
+        search: /PKG_RELEASE = '.*?'/ig,
+        replace: `PKG_RELEASE = '${versionRelease}'`
+    }], 'version in');
+    replaceInFile('core/components/bettermediabrowser/composer.json', [{
+        search: /"php": "\d.\d.*?"/g,
+        replace: '"php": "' + phpversion + '"'
+    }, {
+        search: /"php": ">=\d.\d.*?"/g,
+        replace: '"php": ">=' + phpversion + '"'
+    }], 'requirements in');
+    const buildFiles = [
         'core/components/bettermediabrowser/composer.json',
-        /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
-        `"version": "${version}"`,
-        'version in'
-    );
+    ];
+    buildFiles.forEach(file => {
+        replaceInFile(file, [{
+            search: /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
+            replace: `"version": "${version}"`
+        }], 'version in');
+    });
 }
 
 async function taskCopy() {
@@ -191,7 +223,7 @@ async function taskSass() {
 async function taskImages() {
     console.log('Copying images...');
     const isImage = function (fileName) {
-        return  /\.(png|jpg|gif|svg)$/i.test(fileName);
+        return /\.(png|jpg|gif|svg)$/i.test(fileName);
     };
     await copyFolderRecursive('src/img', 'assets/components/bettermediabrowser/img', isImage);
 }
