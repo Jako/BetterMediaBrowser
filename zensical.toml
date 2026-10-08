@@ -18,7 +18,7 @@ nav = [
 extra_css = ["assets/stylesheets/treehillstudio.css"]
 
 [project.theme]
-custom_dir = "/Users/jako/Documents/MODX/Zensical/TreehillStudio"
+custom_dir = "/Users/jako/Documents/MODX/Zensical/Visions+TreehillStudio"
 favicon = "assets/favicon.png"
 language = "en"
 features = [
