@@ -4,7 +4,7 @@
   "description": "Media Browser Extensions for MODX",
   "author": "Chris Menzi <christoph.menzi@visions.ch>, Thomas Jakobi <office@treehillstudio.com>",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "phpversion": "7.4",
   "modxversion": "2.8",
   "startYear": "2026",

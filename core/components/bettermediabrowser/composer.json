@@ -1,7 +1,7 @@
 {
   "name": "visions/bettermediabrowser",
   "description": "Media Browser Extensions for MODX",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "Chris Menzi",
@@ -21,7 +21,8 @@
     }
   },
   "require": {
-    "php": ">=7.4"
+    "php": ">=7.4",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Build BetterMediaBrowser transport package.
  *
@@ -19,8 +20,10 @@ set_time_limit(0);
 
 const PKG_NAME = 'BetterMediaBrowser';
 const PKG_NAME_LOWER = 'bettermediabrowser';
-const PKG_VERSION = '1.0.0';
+const PKG_VERSION = '1.0.1';
 const PKG_RELEASE = 'pl';
+const PKG_AUTHOR = 'Chris Menzi/Thomas Jakobi';
+const PKG_DESCRIPTION = 'Media Browser Extensions for MODX';
 
 $root = dirname(__DIR__) . '/';
 $buildConfig = __DIR__ . '/build.config.php';
@@ -79,7 +82,8 @@ $sources = [
     'core' => $root . 'core/components/' . PKG_NAME_LOWER,
     'resolvers' => $root . '_build/resolvers/',
     'validators' => $root . '_build/validators/',
-    'data' => $root . '_build/data/'
+    'data' => $root . '_build/data/',
+    'setup' => $root . '_build/setup/'
 ];
 
 $categories = require_once $sources['data'] . 'transport.categories.php';
@@ -94,12 +98,12 @@ $hasCore = is_dir($sources['core']);
 
 $hasContexts = file_exists($sources['data'] . 'transport.contexts.php');
 $hasResources = file_exists($sources['data'] . 'transport.resources.php');
-$hasValidators = is_dir($sources['build'] . 'validators');
-$hasResolvers = is_dir($sources['build'] . 'resolvers');
-$hasSetupOptions = is_dir($sources['data'] . 'install.options');
+$hasValidators = file_exists($sources['data'] . 'transport.validators.php');
+$hasResolvers = file_exists($sources['data'] . 'transport.resolvers.php');
 $hasMenu = file_exists($sources['data'] . 'transport.menus.php');
 $hasSettings = file_exists($sources['data'] . 'transport.settings.php');
 $hasContextSettings = file_exists($sources['data'] . 'transport.contextsettings.php');
+$hasSetupOptions = file_exists($sources['setup'] . 'setup.options.php');
 
 $UNIQUE_KEY = constant($transportClass . '::UNIQUE_KEY');
 $PRESERVE_KEYS = constant($transportClass . '::PRESERVE_KEYS');
@@ -288,7 +292,7 @@ foreach ($categories as $parent => $categoryName) {
         if (is_array($chunks)) {
             if ($category->addMany($chunks, 'Chunks')) {
                 $modx->log(xPDO::LOG_LEVEL_INFO, 'Packaged ' . count($chunks) . ' Chunks');
-            }  else {
+            } else {
                 $modx->log(xPDO::LOG_LEVEL_FATAL, 'Adding Chunks failed');
             }
         } else {
@@ -400,11 +404,11 @@ foreach ($categories as $parent => $categoryName) {
             xPDOTransport::UPDATE_OBJECT => true,
             xPDOTransport::UNIQUE_KEY => 'name',
             xPDOTransport::RELATED_OBJECTS => true,
-            xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array (
+            xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array(
                 'PluginEvents' => array(
                     xPDOTransport::PRESERVE_KEYS => true,
                     xPDOTransport::UPDATE_OBJECT => false,
-                    xPDOTransport::UNIQUE_KEY => array('pluginid','event'),
+                    xPDOTransport::UNIQUE_KEY => array('pluginid', 'event'),
                 ),
             ),
         ];
@@ -413,7 +417,7 @@ foreach ($categories as $parent => $categoryName) {
     $vehicle = $builder->createVehicle($category, $attr);
 
     if ($hasValidators && $i == 1) { /* add validators to the first category */
-        $validators = empty($props['validators']) ? [] : $props['validators'];
+        $plugins = require_once $sources['data'] . '/transport.validators.php';
         if (!empty($validators)) {
             foreach ($validators as $validator) {
                 if ($validator == 'default') {
@@ -432,9 +436,8 @@ foreach ($categories as $parent => $categoryName) {
         }
     }
 
-    if ($hasResolvers && ($i == $count)) {
-        /* add resolvers to last category only */
-        $resolvers = empty($props['resolvers']) ? [] : $props['resolvers'];
+    if ($hasResolvers && ($i == $count)) { /* add resolvers to last category only */
+        $resolvers = require_once $sources['data'] . '/transport.resolvers.php';
         foreach ($resolvers as $resolver) {
             if ($resolver == 'default') {
                 $resolver = PKG_NAME_LOWER;
@@ -454,13 +457,21 @@ foreach ($categories as $parent => $categoryName) {
     $builder->putVehicle($vehicle);
 }
 
-
-
-$builder->setPackageAttributes([
-    'license' => file_get_contents($root . 'LICENSE'),
+$packageAttributes = [
+    'license' => file_get_contents($root . 'LICENSE.md'),
     'readme' => file_get_contents($root . 'README.md'),
     'changelog' => file_get_contents($root . 'CHANGELOG.md'),
-]);
+    'requires' => [
+        'php' => '>=7.4',
+        'modx' => '>=2.8',
+    ]
+];
+if ($hasSetupOptions) {
+    $packageAttributes['setup-options'] = [
+        'source' => $sources['setup'] . 'setup.options.php',
+    ];
+}
+$builder->setPackageAttributes($packageAttributes);
 
 $modx->log(xPDO::LOG_LEVEL_INFO, 'Packing ' . PKG_NAME_LOWER . '-' . PKG_VERSION . '-' . PKG_RELEASE . '.transport.zip');
 $builder->pack();

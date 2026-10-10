@@ -133,7 +133,7 @@ async function taskBump() {
         replaceInFile(file, [{
             search: copyrightRegex,
             replace: copyrightReplace
-        }], 'copyright in');
+        }], 'daterange in');
     });
     replaceInFile('core/components/bettermediabrowser/src/BetterMediaBrowser.php', [{
         search: /version = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
@@ -171,6 +171,13 @@ async function taskBump() {
         search: /PKG_RELEASE = '.*?'/ig,
         replace: `PKG_RELEASE = '${versionRelease}'`
     }], 'version in');
+    replaceInFile('_build/build.transport.php', [{
+        search: /'php' => '>=\d+(\.\d+){1,2}'/ig,
+        replace: `'php' => '>=${phpversion}'`
+    }, {
+        search: /'modx' => '>=\d+(\.\d+){1,2}'/ig,
+        replace: `'modx' => '>=${modxversion}'`
+    }], 'requirements in');
     replaceInFile('core/components/bettermediabrowser/composer.json', [{
         search: /"php": "\d.\d.*?"/g,
         replace: '"php": "' + phpversion + '"'
@@ -178,15 +185,10 @@ async function taskBump() {
         search: /"php": ">=\d.\d.*?"/g,
         replace: '"php": ">=' + phpversion + '"'
     }], 'requirements in');
-    const buildFiles = [
-        'core/components/bettermediabrowser/composer.json',
-    ];
-    buildFiles.forEach(file => {
-        replaceInFile(file, [{
-            search: /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
-            replace: `"version": "${version}"`
-        }], 'version in');
-    });
+    replaceInFile('core/components/bettermediabrowser/composer.json', [{
+        search: /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
+        replace: `"version": "${version}"`
+    }], 'version in');
 }
 
 async function taskCopy() {

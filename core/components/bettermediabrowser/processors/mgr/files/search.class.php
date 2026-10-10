@@ -57,6 +57,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      */
     public function initialize()
     {
+        register_shutdown_function([$this, 'shutdown']);
+
         $this->query = trim(str_replace(['../', './', '/'], '', strip_tags((string)$this->getProperty('query', ''))));
 
         $this->minLength = $this->bettermediabrowser->getOption('search_min_length');
@@ -72,8 +74,6 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
             $this->maxResults = 5000;
         }
 
-        // Empty/too-short queries simply return an empty result set. This keeps
-        // initial grid loading cheap and avoids scanning the whole source by accident.
         if ($this->stringLength($this->query) < $this->minLength) {
             return true;
         }
@@ -84,13 +84,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
 
         $properties = $this->getProperties();
         $properties['hideFiles'] = false;
-        // MODX 2 provides its generated image preview URL inside qtip when
-        // tooltips are enabled. Keeping them enabled lets us reuse the exact
-        // Core preview URL instead of rebuilding phpthumb URLs ourselves.
         $properties['hideTooltips'] = true;
 
-        // Do not overwrite the Media Source's own allow-list unless the browser
-        // explicitly supplied allowedFileTypes.
         if (empty($properties['allowedFileTypes'])) {
             unset($properties['allowedFileTypes']);
         }
@@ -138,7 +133,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Resolve the current Media Source from the request rather than from a fixed setting.
+     * Resolve the current Media Source from the request.
      *
      * @return modMediaSource|bool
      */
@@ -163,8 +158,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Traverse the source using the Media Source API only. No direct filesystem
-     * functions are used, so File/S3/custom sources can provide their own listing.
+     * Scan the source using the Media Source API.
      *
      * @param string $path
      * @param int $depth
@@ -249,8 +243,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Resolve the URL used when the file itself is opened. Media Source drivers
-     * expose slightly different keys between MODX 2, MODX 3 and custom sources.
+     * Resolve the URL used when the file itself is opened.
      *
      * @param array $entry
      * @param string $relativePath
@@ -273,10 +266,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Resolve a preview URL without generating one ourselves. MODX 3 sources
-     * commonly expose thumb/image directly; MODX 2's File Media Source embeds
-     * the Core phpthumb URL in qtip. Reusing that URL preserves auth/source
-     * parameters and custom Media Source behaviour.
+     * Resolve the preview URL.
      *
      * @param array $entry
      * @param string $relativePath
@@ -314,6 +304,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * Is the current entry a directory?
+     *
      * @param array $entry
      * @return bool
      */
@@ -330,6 +322,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * Get the path of an entry
+     *
      * @param array $entry
      * @return string
      */
@@ -348,6 +342,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * Get the name of an entry
+     *
      * @param array $entry
      * @return string
      */
@@ -365,6 +361,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * Normalize a path
+     *
      * @param mixed $path
      * @param bool $directory
      * @return string
@@ -417,6 +415,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * stripos wrapper that uses the mb_stripos method when available
+     *
      * @param string $haystack
      * @param string $needle
      * @return bool
@@ -430,6 +430,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * strlen wrapper that uses the mb_strlen method when available
+     *
      * @param string $value
      * @return int
      */
@@ -442,6 +444,8 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
+     * Sort the result by baseurl
+     *
      * @param array $a
      * @param array $b
      * @return int
@@ -480,6 +484,25 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
         }
 
         return (bool)preg_match($expr, $path);
+    }
+
+    /**
+     * Display a shutdown message (i.e. in case of reaching the maximum
+     * execution time) instead of just a blank result
+     */
+    public function shutdown()
+    {
+        $error = error_get_last();
+        if (is_array($error) && isset($error['type']) && $error['type'] === E_ERROR) {
+            $message = (isset($error['message'])) ? $error['message'] : 'Unknown Error!';
+            if ($this->bettermediabrowser->getOption('debug')) {
+                $this->modx->log(xPDO::LOG_LEVEL_ERROR, 'Script terminated with the error ' . $message, '', $this->modx->lexicon($this->bettermediabrowser->namespace));
+            }
+            exit(json_encode([
+                'success' => false,
+                'message' => $message,
+            ]));
+        }
     }
 }
 

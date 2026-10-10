@@ -1,6 +1,7 @@
 .idea
 config.core.php
 _build/build.config.php
+_build/build.publish.php
 
 icon/*.svg
 
