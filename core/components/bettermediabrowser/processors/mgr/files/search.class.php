@@ -16,6 +16,11 @@ use Visions\BetterMediaBrowser\Processors\Processor;
 
 class BetterMediaBrowserFilesSearchProcessor extends Processor
 {
+    const RESULTS_LIMIT = 500;
+    const RESULTS_LIMIT_MAX = 5000;
+    const PAGE_LIMIT = 20;
+    const PAGE_LIMIT_MAX = 100;
+
     /** @var modMediaSource */
     public $source;
 
@@ -26,13 +31,16 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     protected $minLength = 2;
 
     /** @var int */
-    protected $maxResults = 500;
+    protected $maxResults = self::RESULTS_LIMIT;
+
+    /** @var array */
+    protected $excludedFolders = [];
+
+    /** @var array */
+    protected $imageExtensions = [];
 
     /** @var array */
     protected $results = [];
-
-    /** @var array */
-    protected $visited = [];
 
     /**
      * Same manager permission as the core file-listing processor.
@@ -60,21 +68,15 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
         register_shutdown_function([$this, 'shutdown']);
 
         $this->query = trim(str_replace(['../', './', '/'], '', strip_tags((string)$this->getProperty('query', ''))));
+        $this->minLength = max(2, (int)$this->bettermediabrowser->getOption('search_min_length'));
 
-        $this->minLength = $this->bettermediabrowser->getOption('search_min_length');
-        if ($this->minLength < 1) {
-            $this->minLength = 1;
-        }
-
-        $this->maxResults = $this->bettermediabrowser->getOption('search_max_results');
+        $this->maxResults = (int)$this->bettermediabrowser->getOption('search_max_results');
         if ($this->maxResults < 1) {
-            $this->maxResults = 500;
+            $this->maxResults = self::RESULTS_LIMIT;
         }
-        if ($this->maxResults > 5000) {
-            $this->maxResults = 5000;
-        }
+        $this->maxResults = min($this->maxResults, self::RESULTS_LIMIT_MAX);
 
-        if ($this->stringLength($this->query) < $this->minLength) {
+        if (!$this->isSearchable()) {
             return true;
         }
 
@@ -84,19 +86,19 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
 
         $properties = $this->getProperties();
         $properties['hideFiles'] = false;
+        // Avoid building image previews (image size, EXIF, phpThumb URLs) for each listed file
         $properties['hideTooltips'] = true;
-
         if (empty($properties['allowedFileTypes'])) {
             unset($properties['allowedFileTypes']);
         }
 
         $this->source->setRequestProperties($properties);
-        if (!$this->source->initialize()) {
+        if (!$this->source->initialize() || !$this->source->checkPolicy('list')) {
             return $this->modx->lexicon('permission_denied');
         }
-        if (!$this->source->checkPolicy('list')) {
-            return $this->modx->lexicon('permission_denied');
-        }
+
+        $this->excludedFolders = array_filter((array)$this->bettermediabrowser->getOption('excluded_folders'), 'strlen');
+        $this->imageExtensions = $this->getImageExtensions();
 
         return true;
     }
@@ -106,30 +108,53 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      */
     public function process()
     {
-        if ($this->stringLength($this->query) < $this->minLength || !$this->source) {
+        if (!$this->isSearchable() || !$this->source) {
             return $this->outputArray([], 0);
         }
 
         $cacheManager = $this->modx->getCacheManager();
-        $this->results = $cacheManager->get('source_' . $this->query . '_' . $this->source->get('id'), $this->bettermediabrowser->cacheOptions);
-        if (!$this->results) {
+        $cacheKey = $this->getCacheKey();
+        $this->results = $cacheManager->get($cacheKey, $this->bettermediabrowser->cacheOptions);
+        if (!is_array($this->results)) {
             $this->results = [];
             $this->scanContainer('', 0);
             usort($this->results, [$this, 'sortResults']);
-            $cacheManager->set('source_' . $this->query . '_' . $this->source->get('id'), $this->results, 60, $this->bettermediabrowser->cacheOptions);
+            $cacheManager->set($cacheKey, $this->results, 60, $this->bettermediabrowser->cacheOptions);
         }
 
-        $total = count($this->results);
         $start = max(0, (int)$this->getProperty('start', 0));
-        $limit = (int)$this->getProperty('limit', 20);
+        $limit = (int)$this->getProperty('limit', self::PAGE_LIMIT);
         if ($limit < 1) {
-            $limit = 20;
+            $limit = self::PAGE_LIMIT;
         }
-        if ($limit > 100) {
-            $limit = 100;
-        }
+        $limit = min($limit, self::PAGE_LIMIT_MAX);
 
-        return $this->outputArray(array_slice($this->results, $start, $limit), $total);
+        return $this->outputArray(array_slice($this->results, $start, $limit), count($this->results));
+    }
+
+    /**
+     * Is the query long enough to start a search?
+     *
+     * @return bool
+     */
+    protected function isSearchable()
+    {
+        return $this->stringLength($this->query) >= $this->minLength;
+    }
+
+    /**
+     * The cache key depends on all request values that change the result list.
+     *
+     * @return string
+     */
+    protected function getCacheKey()
+    {
+        return 'source_' . $this->source->get('id') . '_' . md5(json_encode([
+                $this->query,
+                (string)$this->getProperty('allowedFileTypes', ''),
+                $this->excludedFolders,
+                $this->maxResults,
+            ]));
     }
 
     /**
@@ -158,7 +183,31 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Scan the source using the Media Source API.
+     * Get the lowercased image extensions of the Media Source.
+     *
+     * @return array
+     */
+    protected function getImageExtensions()
+    {
+        $imageExtensions = $this->source->getOption('imageExtensions', null, 'jpg,jpeg,png,gif,svg,webp');
+        if (!is_array($imageExtensions)) {
+            $imageExtensions = explode(',', (string)$imageExtensions);
+        }
+        return array_map('strtolower', array_map('trim', $imageExtensions));
+    }
+
+    /**
+     * Is the maximum number of results reached?
+     *
+     * @return bool
+     */
+    protected function maxResultsReached()
+    {
+        return count($this->results) >= $this->maxResults;
+    }
+
+    /**
+     * Scan a container of the source recursively using the Media Source API.
      *
      * @param string $path
      * @param int $depth
@@ -166,17 +215,11 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      */
     protected function scanContainer($path, $depth)
     {
-        if (count($this->results) >= $this->maxResults || $depth > 64) {
+        if ($this->maxResultsReached() || $depth > 64) {
             return;
         }
 
         $path = $this->normalizePath($path, true);
-        $visitKey = $path === '' ? '/' : $path;
-        if (isset($this->visited[$visitKey])) {
-            return;
-        }
-        $this->visited[$visitKey] = true;
-
         $entries = $this->source->getContainerList($path);
         if (!is_array($entries)) {
             return;
@@ -190,56 +233,85 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
 
             if ($this->isDirectory($entry)) {
                 $directoryPath = $this->getEntryPath($entry);
-                foreach ($this->bettermediabrowser->getOption('excluded_folders') as $excludeFolder) {
-                    if ($this->pathMatches($directoryPath, $excludeFolder, true)) {
-                        continue 2;
-                    }
-                }
-                if ($directoryPath !== '') {
-                    $directories[] = $directoryPath;
+                if ($this->isChildPath($directoryPath, $path) && !$this->isExcluded($directoryPath)) {
+                    $directories[$directoryPath] = $directoryPath;
                 }
                 continue;
             }
 
-            $filename = $this->getEntryName($entry);
-            if ($filename === '' || !$this->contains($filename, $this->query)) {
-                continue;
+            $this->addResult($entry);
+            if ($this->maxResultsReached()) {
+                return;
             }
-
-            $relativePath = $this->getEntryPath($entry);
-            if ($relativePath === '') {
-                continue;
-            }
-
-            $directory = $this->parentPath($relativePath);
-            $objectUrl = $this->resolveObjectUrl($entry, $relativePath);
-            $thumb = $this->resolvePreviewUrl($entry, $relativePath, $objectUrl);
-
-            $this->results[] = [
-                'filename' => $filename,
-                'path' => $relativePath,
-                'baseurl' => $relativePath,
-                'fullurl' => $objectUrl,
-                'thumb' => $thumb,
-                'directory' => $directory,
-                'source' => (int)$this->source->get('id'),
-            ];
-
-            if (count($this->results) >= $this->maxResults) {
-                break;
-            }
-        }
-
-        if (count($this->results) >= $this->maxResults) {
-            return;
         }
 
         foreach ($directories as $directoryPath) {
             $this->scanContainer($directoryPath, $depth + 1);
-            if (count($this->results) >= $this->maxResults) {
+            if ($this->maxResultsReached()) {
                 return;
             }
         }
+    }
+
+    /**
+     * Add a file entry to the results, if its name matches the query.
+     *
+     * @param array $entry
+     * @return void
+     */
+    protected function addResult(array $entry)
+    {
+        $filename = $this->getEntryName($entry);
+        if ($filename === '' || !$this->contains($filename, $this->query)) {
+            return;
+        }
+
+        $relativePath = $this->getEntryPath($entry);
+        if ($relativePath === '') {
+            return;
+        }
+
+        $objectUrl = $this->resolveObjectUrl($entry, $relativePath);
+        $this->results[] = [
+            'filename' => $filename,
+            'path' => $relativePath,
+            'baseurl' => $relativePath,
+            'fullurl' => $objectUrl,
+            'thumb' => $this->resolvePreviewUrl($relativePath, $objectUrl),
+            'directory' => $this->parentPath($relativePath),
+            'source' => (int)$this->source->get('id'),
+        ];
+    }
+
+    /**
+     * Only descend into strict children of the current path, to avoid loops.
+     *
+     * @param string $path
+     * @param string $parent
+     * @return bool
+     */
+    protected function isChildPath($path, $parent)
+    {
+        if ($path === '' || $path === $parent) {
+            return false;
+        }
+        return $parent === '' || strpos($path, $parent) === 0;
+    }
+
+    /**
+     * Is the directory excluded by the excluded_folders system setting?
+     *
+     * @param string $path
+     * @return bool
+     */
+    protected function isExcluded($path)
+    {
+        foreach ($this->excludedFolders as $excludedFolder) {
+            if ($this->pathMatches($path, $excludedFolder, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -251,15 +323,14 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      */
     protected function resolveObjectUrl(array $entry, $relativePath)
     {
-        $keys = ['urlAbsolute', 'fullRelativeUrl', 'relativeUrl', 'urlExternal', 'url'];
-        foreach ($keys as $key) {
+        foreach (['urlAbsolute', 'fullRelativeUrl', 'relativeUrl', 'urlExternal', 'url'] as $key) {
             if (isset($entry[$key]) && $entry[$key] !== '') {
                 return (string)$entry[$key];
             }
         }
 
         if (method_exists($this->source, 'getObjectUrl')) {
-            return $this->source->getObjectUrl($relativePath);
+            return (string)$this->source->getObjectUrl($relativePath);
         }
 
         return '';
@@ -268,35 +339,19 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     /**
      * Resolve the preview URL.
      *
-     * @param array $entry
+     * Thumbnails or tooltip images provided by the Media Source are ignored on
+     * purpose, because they usually point to the phpThumb connector and would
+     * generate a thumbnail for each displayed search result. Browser-displayable
+     * image formats are previewed by their file URL instead.
+     *
      * @param string $relativePath
      * @param string $objectUrl
      * @return string
      */
-    protected function resolvePreviewUrl(array $entry, $relativePath, $objectUrl)
+    protected function resolvePreviewUrl($relativePath, $objectUrl)
     {
-        $keys = ['thumb', 'thumbnail', 'image', 'previewUrl', 'preview_url'];
-        foreach ($keys as $key) {
-            if (isset($entry[$key]) && is_string($entry[$key]) && $entry[$key] !== '') {
-                return $entry[$key];
-            }
-        }
-
-        if (!empty($entry['qtip']) && is_string($entry['qtip'])) {
-            if (preg_match('/<img\b[^>]*\bsrc=["\']([^"\']+)["\']/i', $entry['qtip'], $matches)) {
-                return html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-            }
-        }
-
-        // If the Media Source did not provide a dedicated thumbnail, the file
-        // URL is still a valid preview for browser-displayable image formats.
         $ext = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
-        $imageExtensions = $this->source->getOption('imageExtensions', null, 'jpg,jpeg,png,gif,svg,webp');
-        if (!is_array($imageExtensions)) {
-            $imageExtensions = array_map('trim', explode(',', (string)$imageExtensions));
-        }
-        $imageExtensions = array_map('strtolower', $imageExtensions);
-        if ($objectUrl !== '' && in_array($ext, $imageExtensions, true)) {
+        if ($objectUrl !== '' && in_array($ext, $this->imageExtensions, true)) {
             return $objectUrl;
         }
 
@@ -312,13 +367,10 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     protected function isDirectory(array $entry)
     {
         $type = isset($entry['type']) ? strtolower((string)$entry['type']) : '';
-        if ($type === 'dir' || $type === 'directory' || $type === 'folder') {
+        if (in_array($type, ['dir', 'directory', 'folder'], true)) {
             return true;
         }
-        if (isset($entry['leaf']) && ($entry['leaf'] === false || $entry['leaf'] === 0 || $entry['leaf'] === '0')) {
-            return true;
-        }
-        return false;
+        return isset($entry['leaf']) && in_array($entry['leaf'], [false, 0, '0'], true);
     }
 
     /**
@@ -330,12 +382,11 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     protected function getEntryPath(array $entry)
     {
         $path = '';
-        if (isset($entry['pathRelative']) && $entry['pathRelative'] !== '') {
-            $path = $entry['pathRelative'];
-        } elseif (isset($entry['path']) && $entry['path'] !== '') {
-            $path = $entry['path'];
-        } elseif (isset($entry['id']) && $entry['id'] !== '') {
-            $path = $entry['id'];
+        foreach (['pathRelative', 'path', 'id'] as $key) {
+            if (isset($entry[$key]) && $entry[$key] !== '') {
+                $path = $entry[$key];
+                break;
+            }
         }
 
         return $this->normalizePath($path, $this->isDirectory($entry));
@@ -377,10 +428,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
             }
             $path = $decoded;
         }
-        $path = str_replace('\\', '/', $path);
-        $path = str_replace("\0", '', $path);
-        $path = preg_replace('#/+#', '/', $path);
-        $path = ltrim($path, '/');
+        $path = str_replace(['\\', "\0"], ['/', ''], $path);
 
         $safe = [];
         foreach (explode('/', $path) as $segment) {
@@ -395,7 +443,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
 
         $path = implode('/', $safe);
         if ($directory && $path !== '') {
-            $path = rtrim($path, '/') . '/';
+            $path .= '/';
         }
         return $path;
     }
@@ -408,10 +456,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     {
         $path = rtrim($this->normalizePath($path), '/');
         $pos = strrpos($path, '/');
-        if ($pos === false) {
-            return '';
-        }
-        return substr($path, 0, $pos + 1);
+        return ($pos === false) ? '' : substr($path, 0, $pos + 1);
     }
 
     /**
@@ -458,30 +503,42 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     }
 
     /**
-     * Match a path with a glob pattern (https://stackoverflow.com/a/13914119)
+     * Match a path with a glob pattern, anchored at the Media Source root.
+     * (Initial version from https://stackoverflow.com/a/13914119)
      *
-     * @param $path
-     * @param $pattern
-     * @param $ignoreCase
+     * `*` and `?` stay inside a single path segment, `**` spans multiple
+     * segments, so a pattern starting with `**` and a slash matches at any
+     * depth. A pattern without a trailing slash is treated as a folder.
+     *
+     * @param string $path
+     * @param string $pattern
+     * @param bool $ignoreCase
      * @return bool
      */
-    protected function pathMatches($path, $pattern, $ignoreCase = FALSE)
+    protected function pathMatches($path, $pattern, $ignoreCase = false)
     {
-        $expr = preg_replace_callback('/[\\\\^$.[\\]|()?*+{}\\-\\/]/', function ($matches) {
+        $pattern = ltrim(str_replace('\\', '/', trim($pattern)), '/');
+        if ($pattern === '') {
+            return false;
+        }
+        $pattern = rtrim($pattern, '/') . '/';
+
+        $expr = preg_replace_callback('/\*\*\/|\*\*|\*|\?|[^*?]+/', function ($matches) {
             switch ($matches[0]) {
-                case '*':
+                case '**/':
+                    return '(?:.*/)?';
+                case '**':
                     return '.*';
+                case '*':
+                    return '[^/]*';
                 case '?':
-                    return '.';
+                    return '[^/]';
                 default:
-                    return '\\' . $matches[0];
+                    return preg_quote($matches[0], '#');
             }
         }, $pattern);
 
-        $expr = '/' . $expr . '/';
-        if ($ignoreCase) {
-            $expr .= 'i';
-        }
+        $expr = '#^' . $expr . '$#' . ($ignoreCase ? 'i' : '');
 
         return (bool)preg_match($expr, $path);
     }

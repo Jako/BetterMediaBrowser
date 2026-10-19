@@ -90,7 +90,8 @@
 .bettermediabrowser-search-thumb img {
   max-width: 56px;
   max-height: 44px;
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 
 .bettermediabrowser-search-open {
