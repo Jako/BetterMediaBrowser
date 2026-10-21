@@ -284,7 +284,7 @@
             return null;
         }
 
-        return {node: node, row: row};
+        return { node: node, row: row };
     }
 
     function clearExpandTimer() {
@@ -301,7 +301,8 @@
                 if (window.Ext && Ext.get) {
                     Ext.get(state.target.row).removeClass('bettermediabrowser-drop-target');
                 } else {
-                    state.target.row.className = String(state.target.row.className || '').replace(/\bbettermediabrowser-drop-target\b/g, '');
+                    state.target.row.className = String(state.target.row.className || '')
+                        .replace(/\bbettermediabrowser-drop-target\b/g, '');
                 }
             } catch (e) {
                 debug('Could not clear target styling', e);
@@ -354,7 +355,8 @@
                     if (window.Ext && Ext.get) {
                         Ext.get(dragItems[dragIndex]).removeClass('bettermediabrowser-drag-source');
                     } else {
-                        dragItems[dragIndex].className = String(dragItems[dragIndex].className || '').replace(/\bbettermediabrowser-drag-source\b/g, '');
+                        dragItems[dragIndex].className = String(dragItems[dragIndex].className || '')
+                            .replace(/\bbettermediabrowser-drag-source\b/g, '');
                     }
                 }
             } catch (e) {
@@ -402,7 +404,7 @@
     }
 
     function status(title, message) {
-        MODx.msg.status({title: title, message: message});
+        MODx.msg.status({ title: title, message: message });
     }
 
     function htmlEncode(value) {
@@ -1214,7 +1216,8 @@
         try {
             if (view && view.config && view.config.tree) {
                 if (view.config.tree.cm && view.config.tree.cm.activeNode &&
-                    view.config.tree.cm.activeNode.id && String(view.config.tree.cm.activeNode.id).match(/.*?\/$/)) {
+                    view.config.tree.cm.activeNode.id && String(view.config.tree.cm.activeNode.id)
+                        .match(/.*?\/$/)) {
                     if (typeof view.config.tree.refreshParentNode === 'function') {
                         view.config.tree.refreshParentNode();
                     } else if (typeof view.config.tree.refresh === 'function') {
@@ -1258,7 +1261,7 @@
 
         Ext.Msg.confirm(
             _('warning'),
-            _('bettermediabrowser.remove_selected_confirm', {count: total}),
+            _('bettermediabrowser.remove_selected_confirm', { count: total }),
             function (button) {
                 if (button !== 'yes') {
                     return;
@@ -1268,7 +1271,7 @@
                 var removeNext = function () {
                     if (index >= files.length) {
                         refreshAfterBatchDelete(view);
-                        status(_('success'), _('bettermediabrowser.msg_files_removed', {count: total}));
+                        status(_('success'), _('bettermediabrowser.msg_files_removed', { count: total }));
                         return;
                     }
 
@@ -1382,7 +1385,7 @@
 
         var downloadNext = function () {
             if (index >= files.length) {
-                status('', _('bettermediabrowser.msg_files_download_started', {count: started}));
+                status('', _('bettermediabrowser.msg_files_download_started', { count: started }));
                 return;
             }
 
@@ -1610,7 +1613,8 @@
                     var rootText = root ? stripTags(root.text || '') : '';
                     var textPath = rootPath || (rootText ? '/' + rootText : '');
                     if (textPath) {
-                        textPath = textPath.replace(/\/$/, '') + '/' + safeDecode(normalized).replace(/^\/+|\/+$/g, '');
+                        textPath = textPath.replace(/\/$/, '') + '/' + safeDecode(normalized)
+                            .replace(/^\/+|\/+$/g, '');
                         tree.selectPath(textPath, 'text', function (success, node) {
                             if (success && node) {
                                 selectNode(node);
@@ -1911,7 +1915,7 @@
         if (view.rendered) {
             attachContextSelectionPreserver(view, binding);
         } else if (typeof view.on === 'function') {
-            view.on('afterrender', binding.contextAfterRender, view, {single: true});
+            view.on('afterrender', binding.contextAfterRender, view, { single: true });
         }
 
         if (typeof binding.originalRemoveFile === 'function') {
@@ -2000,7 +2004,7 @@
             view.on('destroy', binding.destroy, view);
         }
 
-        // Explicit openTo values always win. Otherwise restore the last folder for this
+        // Explicit openTo values always win. Otherwise, restore the last folder for this
         // Media Source in this browser tab/session.
         if (!hasExplicitOpenTo(view)) {
             window.setTimeout(function () {
@@ -2073,7 +2077,7 @@
                 query: ''
             },
             pageSize: 5,
-            fields: ['filename', 'path', 'baseurl', 'fullurl', 'thumb', 'directory', 'source'],
+            fields: ['filename', 'path', 'baseurl', 'directory', 'source'],
             autoHeight: false,
             height: 445,
             paging: true,
@@ -2083,17 +2087,24 @@
             emptyText: _('bettermediabrowser.files_empty'),
             columns: [{
                 header: '',
-                dataIndex: 'thumb',
+                dataIndex: 'filename',
                 width: 72,
                 fixed: true,
                 renderer: {
                     fn: function (value, meta, record) {
-                        var src = value || (record && record.data ? record.data.thumb : '');
-                        src = this.normalizeSearchPreviewUrl(src);
-                        if (!src) {
-                            return '<span class="bettermediabrowser-search-thumb"></span>';
+                        if (record.data.baseurl) {
+                            let url = MODx.config.connectors_url + 'system/phpthumb.php';
+                            let params = {
+                                src: record.data.baseurl,
+                                wctx: 'web',
+                                h: '60',
+                                source: record.data.source,
+                            };
+                            const searchParams = new URLSearchParams(params);
+                            return '<div class="bettermediabrowser-search-thumb"><img src="' + url + '?' + searchParams.toString() + '" alt="' + url + '"/></div>';
+                        } else {
+                            return '<div class="bettermediabrowser-search-thumb"></div>';
                         }
-                        return '<div class="bettermediabrowser-search-thumb"><img src="' + htmlEncode(src) + '" alt="" /></div>';
                     },
                     scope: this,
                 }
@@ -2195,7 +2206,8 @@
         onClick: function (e) {
             var target = e.getTarget ? e.getTarget() : null;
             if (target && hasClass(target, 'bettermediabrowser-search-open')) {
-                var rowIndex = this.getView && this.getView().findRowIndex ? this.getView().findRowIndex(target) : -1;
+                var rowIndex = this.getView && this.getView().findRowIndex ? this.getView()
+                    .findRowIndex(target) : -1;
                 var record = rowIndex >= 0 ? this.getStore().getAt(rowIndex) : null;
                 if (record && record.data) {
                     this.openRecord(record.data);
@@ -2203,19 +2215,6 @@
                 return;
             }
             BetterMediaBrowser.grid.SearchFilesGrid.superclass.onClick.call(this, e);
-        },
-        normalizeSearchPreviewUrl: function (value) {
-            var url = String(value || '');
-            if (!url) {
-                return '';
-            }
-            // Handle absolute/protocol/data/blob and the core connector URLs directly.
-            if (/^(?:https?:)?\/\//i.test(url) || /^(?:data|blob):/i.test(url) || url.charAt(0) === '/' || url.indexOf('../') === 0 || url.indexOf('./') === 0) {
-                return url;
-            }
-            // Prefix the configured MODX base URL otherwise.
-            var baseUrl = MODx.config.base_url;
-            return baseUrl.replace(/\/+$/, '') + '/' + url.replace(/^\/+/, '');
         },
         selectSearchResultInView: function (view, data) {
             if (!view || !data || !data.path || !view.store || typeof view.run !== 'function') {
@@ -2257,7 +2256,7 @@
 
             try {
                 if (view.store.on) {
-                    view.store.on('load', loadHandler, null, {single: true});
+                    view.store.on('load', loadHandler, null, { single: true });
                 }
                 view.dir = directory;
                 view.run({
@@ -2558,7 +2557,10 @@
                     state.observer.disconnect();
                 }
                 state.observer = new MutationObserver(function (mutations) {
-                    var i, j, nodes, node;
+                    var i,
+                        j,
+                        nodes,
+                        node;
                     if (state.disabled) {
                         return;
                     }
@@ -2573,7 +2575,7 @@
                         }
                     }
                 });
-                state.observer.observe(document.body, {childList: true, subtree: true});
+                state.observer.observe(document.body, { childList: true, subtree: true });
             } else if (!state.fallbackTimer) {
                 state.fallbackTimer = window.setInterval(function () {
                     if (state.disabled) {

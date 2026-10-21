@@ -276,8 +276,6 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
             'filename' => $filename,
             'path' => $relativePath,
             'baseurl' => $relativePath,
-            'fullurl' => $objectUrl,
-            'thumb' => $this->resolvePreviewUrl($relativePath, $objectUrl),
             'directory' => $this->parentPath($relativePath),
             'source' => (int)$this->source->get('id'),
         ];

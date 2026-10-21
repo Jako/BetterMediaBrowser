@@ -15,9 +15,9 @@ class OnManagerPageBeforeRender extends Plugin
         if ($this->modx->user && $this->modx->user->hasSessionContext('mgr')) {
             $assetsUrl = $this->bettermediabrowser->getOption('assetsUrl');
             $jsUrl = $this->bettermediabrowser->getOption('jsUrl') . 'mgr/';
-            $jsSourceUrl = $assetsUrl . '../../../source/js/mgr/';
+            $jsSourceUrl = $assetsUrl . '../../../src/js/mgr/';
             $cssUrl = $this->bettermediabrowser->getOption('cssUrl') . 'mgr/';
-            $cssSourceUrl = $assetsUrl . '../../../source/css/mgr/';
+            $cssSourceUrl = $assetsUrl . '../../../src/css/mgr/';
 
             $this->modx->controller->addLexiconTopic('bettermediabrowser:default');
 
