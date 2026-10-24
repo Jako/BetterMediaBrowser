@@ -47,7 +47,7 @@ $definitions = [
     ],
     [
         'key' => 'bettermediabrowser.excluded_folders',
-        'value' => '.*/,core/,components/,connectors/,manager/',
+        'value' => '.*/,_*/,core/,components/,connectors/,manager/',
         'xtype' => 'textfield',
         'namespace' => 'bettermediabrowser',
         'area' => 'search',

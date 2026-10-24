@@ -16,6 +16,46 @@ $definitions = [
                 'event' => 'OnManagerPageBeforeRender',
                 'priority' => 0,
                 'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerUpload',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerFileCreate',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerFileRename',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerFileRemove',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerDirRename',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerDirRemove',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnFileManagerMoveObject',
+                'priority' => 0,
+                'propertyset' => 0,
+            ],
+            [
+                'event' => 'OnSiteRefresh',
+                'priority' => 0,
+                'propertyset' => 0,
             ]
         ]
     ],
@@ -36,7 +76,7 @@ foreach ($definitions as $definition) {
     foreach ($definition['events'] as $definitionEvent) {
         $event = $modx->newObject($pluginEventClass);
         $event->fromArray($definitionEvent, '', true, true);
-        $events[$pluginEventClass] = $event;
+        $events[] = $event;
     }
     $plugin->addMany($events);
     $plugins[$filename] = $plugin;

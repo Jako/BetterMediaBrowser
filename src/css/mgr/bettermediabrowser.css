@@ -93,6 +93,26 @@
   -o-object-fit: contain;
      object-fit: contain;
 }
+.bettermediabrowser-search-thumb .icon {
+  align-self: flex-start;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.modx-browser-tree .modx-tree > .x-panel-bwrap {
+  overflow: visible;
+}
+.modx-browser-tree .modx-tree > .x-panel-bwrap > .x-panel-tbar, .modx-browser-tree .modx-tree > .x-panel-bwrap > .x-panel-tbar-noheader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #fff;
+}
+
+.modx-browser-tree > .x-panel-bwrap > .x-panel-body {
+  overflow-x: hidden !important;
+}
 
 .bettermediabrowser-search-open {
   cursor: pointer;

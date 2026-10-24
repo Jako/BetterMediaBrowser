@@ -103,6 +103,29 @@ $treehillstudio-color: #cbd842;
     max-height: 44px;
     object-fit: contain;
   }
+  .icon {
+    align-self: flex-start;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
+  }
+}
+
+// Keep the toolbar and the media source selector of the media browser tree
+// visible, while the tree is scrolled.
+.modx-browser-tree .modx-tree > .x-panel-bwrap {
+  overflow: visible;
+
+  > .x-panel-tbar, > .x-panel-tbar-noheader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #fff;
+  }
+}
+
+.modx-browser-tree > .x-panel-bwrap > .x-panel-body {
+  overflow-x: hidden !important;
 }
 
 .bettermediabrowser-search-open {

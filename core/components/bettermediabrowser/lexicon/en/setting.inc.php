@@ -1,6 +1,6 @@
 <?php
 /**
- * Setting Lexicon Entries for BackupMODX
+ * Setting Lexicon Entries for BetterMediaBrowser
  *
  * @package bettermediabrowser
  * @subpackage lexicon

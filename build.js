@@ -147,7 +147,7 @@ async function taskBump() {
         replace: `version = '${version}'`
     }], 'version in');
     const scriptFiles = [
-        'src/js/mgr/helper/api.js'
+        'src/js/mgr/widgets/search.window.js'
     ];
     for (const file of scriptFiles) {
         await replaceInFile(file, [{
@@ -216,6 +216,14 @@ async function taskCopy() {
 async function taskScripts() {
     await compileScripts([
         'src/js/mgr/bettermediabrowser.js',
+        'src/js/mgr/helper/util.js',
+        'src/js/mgr/helper/dragdrop.js',
+        'src/js/mgr/helper/selection.js',
+        'src/js/mgr/helper/lastfolder.js',
+        'src/js/mgr/helper/browser.js',
+        'src/js/mgr/widgets/search.grid.js',
+        'src/js/mgr/widgets/search.window.js',
+        'src/js/mgr/helper/search.js',
         'src/js/mgr/helper/api.js',
     ], 'assets/components/bettermediabrowser/js/mgr/', 'bettermediabrowser.js');
 }
