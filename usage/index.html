@@ -533,10 +533,13 @@
 for moving one or more files within the tree, deleting/downloading multiple
 files, and searching for files in the currently active media source. It also
 remembers the most recently used subfolders of a media source and restores them
-the next time the source is opened.</p>
+the next time the source is opened. The file search uses a cached
+file index per media source, which is cleared automatically when files are
+changed or the MODX cache is cleared.</p>
 <p><a class="glightbox" data-type="image" href="../img/bettermediabrowser-search.png"><img alt="Search window" src="../img/bettermediabrowser-search.png" /></a></p>
 <h2 id="system-settings">System Settings</h2>
-<p><em>BetterMediaBrowser</em> contains some <em>system settings</em> in the <code>bettermediabrowser</code> namespace.</p>
+<p><em>BetterMediaBrowser</em> contains some <em>system settings</em> in the <code>bettermediabrowser</code>
+namespace.</p>
 <table>
 <thead>
 <tr>
@@ -586,11 +589,21 @@ the next time the source is opened.</p>
 <tr>
 <td>bettermediabrowser.excluded_folders</td>
 <td>Excluded Folders</td>
-<td>Comma-separated list of folders to be excluded from the search results.</td>
-<td><code>.*/,core/,components/,connectors/,manager/</code></td>
+<td>Comma-separated list of folders to be excluded from the search results.<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>.*/,_*/,core/,components/,connectors/,manager/</code></td>
 </tr>
 </tbody>
 </table>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>The folders in the list may use <code>*</code> and <code>?</code> inside a single path segment,
+<code>**</code> spans multiple segments, so a pattern starting with <code>**</code> and a slash
+matches at any depth. A pattern without a trailing slash is treated as a folder.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
