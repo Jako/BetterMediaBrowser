@@ -1,6 +1,8 @@
 # BetterMediaBrowser
 
-**BetterMediaBrowser** extends the MODX browser with drag-and-drop functionality for moving one or more files within the tree, deleting/downloading multiple files, and searching for files in the currently active media source.
+**BetterMediaBrowser** extends the MODX browser with drag-and-drop functionality
+for moving one or more files within the tree, deleting/downloading multiple
+files, and searching for files in the currently active media source.
 
 ## Features
 
@@ -8,8 +10,10 @@
 - Move multiple selected files to another folder at once using drag-and-drop
 - Select multiple files using Ctrl/Cmd or Shift and download or delete them all at once
 - Remember the most recently used subfolders of a media source and restore them the next time the source is opened
+- Keep the toolbar and the media source selector of the directory tree visible while scrolling the tree
 - Search using a search icon in the media source’s toolbar
-- Display search results with thumbnails and relative paths
+- Fast searches with a cached file index per media source, which is cleared automatically on file changes and when the MODX cache is cleared
+- Display search results with thumbnails for images, file icons for other files and relative paths
 - A search hit opens the target folder in the file view, opens the folder in the directory tree, and sets the path when a file is selected
 - Compatible with MODX 2.8.x and 3.x
 
@@ -33,15 +37,15 @@ MODX Package Management
 
 _BetterMediaBrowser_ contains some _system settings_ in the `bettermediabrowser` namespace.
 
-| Key                                   | Name               | Description                                                             | Default                                      |
-|---------------------------------------|--------------------|-------------------------------------------------------------------------|----------------------------------------------|
-| bettermediabrowser.debug              | Debug              | Log debug information in the MODX error log.                            | Nein                                         |         
-| bettermediabrowser.enabled            | Enabled            | Enable the BetterMediaBrowser extension.                                | Ja                                           |         
-| bettermediabrowser.drag_drop_enabled  | Enable Drag & Drop | Enable drag-and-drop for files in the MODX Browser.                     | Ja                                           |         
-| bettermediabrowser.search_enabled     | Enable Search      | Enable the BetterMediaBrowser file search.                              | Ja                                           |         
-| bettermediabrowser.search_min_length  | Min Length         | Minimum length of the search string before as search is executed.       | 2                                            |         
-| bettermediabrowser.search_max_results | Max Results        | Maximum count of files in the search results.                           | 500                                          |         
-| bettermediabrowser.excluded_folders   | Excluded Folders   | Comma-separated list of folders to be excluded from the search results. | `.*/,core/,components/,connectors/,manager/` |         
+| Key                                   | Name               | Description                                                             | Default                                          |
+|---------------------------------------|--------------------|-------------------------------------------------------------------------|--------------------------------------------------|
+| bettermediabrowser.debug              | Debug              | Log debug information in the MODX error log.                            | Nein                                             |         
+| bettermediabrowser.enabled            | Enabled            | Enable the BetterMediaBrowser extension.                                | Ja                                               |         
+| bettermediabrowser.drag_drop_enabled  | Enable Drag & Drop | Enable drag-and-drop for files in the MODX Browser.                     | Ja                                               |         
+| bettermediabrowser.search_enabled     | Enable Search      | Enable the BetterMediaBrowser file search.                              | Ja                                               |         
+| bettermediabrowser.search_min_length  | Min Length         | Minimum length of the search string before as search is executed.       | 2                                                |         
+| bettermediabrowser.search_max_results | Max Results        | Maximum count of files in the search results.                           | 500                                              |         
+| bettermediabrowser.excluded_folders   | Excluded Folders   | Comma-separated list of folders to be excluded from the search results. | `.*/,_*/,core/,components/,connectors/,manager/` |         
 
 ## License
 

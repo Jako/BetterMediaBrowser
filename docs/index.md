@@ -13,8 +13,10 @@ Media Browser Extensions for MODX
 - Move multiple selected files to another folder at once using drag-and-drop
 - Select multiple files using Ctrl/Cmd or Shift and download or delete them all at once
 - Remember the most recently used subfolders of a media source and restore them the next time the source is opened
+- Keep the toolbar and the media source selector of the directory tree visible while scrolling the tree
 - Search using a search icon in the media source’s toolbar
-- Display search results with thumbnails and relative paths
+- Fast searches with a cached file index per media source, which is cleared automatically on file changes and when the MODX cache is cleared
+- Display search results with thumbnails for images, file icons for other files and relative paths
 - A search hit opens the target folder in the file view, opens the folder in the directory tree, and sets the path when a file is selected
 - Compatible with MODX 2.8.x and 3.x
 

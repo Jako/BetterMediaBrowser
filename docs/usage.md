@@ -4,7 +4,9 @@ BetterMediaBrowser extends the MODX browser with drag & drop functionality
 for moving one or more files within the tree, deleting/downloading multiple
 files, and searching for files in the currently active media source. It also
 remembers the most recently used subfolders of a media source and restores them
-the next time the source is opened.
+the next time the source is opened. The file search uses a cached
+file index per media source, which is cleared automatically when files are
+changed or the MODX cache is cleared.
 
 ![Search window](img/bettermediabrowser-search.png)
 
