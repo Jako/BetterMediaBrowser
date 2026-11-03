@@ -143,7 +143,6 @@
             var store = this.getStore();
             store.baseParams.query = String(field.getValue() || '');
             this.getBottomToolbar().changePage(1);
-            this.refresh();
         },
         clearSearch: function () {
             var toolbar = this.getTopToolbar();
@@ -152,7 +151,6 @@
             store.baseParams.query = '';
             field.reset();
             this.getBottomToolbar().changePage(1);
-            this.refresh();
         },
         openRecord: function (data) {
             this.selectSearchResultInView(this.browserView, data);

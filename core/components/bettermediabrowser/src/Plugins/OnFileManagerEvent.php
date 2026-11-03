@@ -15,9 +15,13 @@ abstract class OnFileManagerEvent extends Plugin
 {
     public function process()
     {
-        $source = isset($this->scriptProperties['source']) ? $this->scriptProperties['source'] : null;
-        if (is_object($source)) {
-            $this->bettermediabrowser->getSearchCache()->clear($source->get('id'));
+        // OnFileManagerMoveObject provides the target Media Source as toSource,
+        // if a file is moved to another Media Source
+        foreach (['source', 'toSource'] as $key) {
+            $source = isset($this->scriptProperties[$key]) ? $this->scriptProperties[$key] : null;
+            if (is_object($source)) {
+                $this->bettermediabrowser->getSearchCache()->clear($source->get('id'));
+            }
         }
     }
 }

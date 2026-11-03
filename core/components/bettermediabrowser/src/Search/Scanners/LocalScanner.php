@@ -81,7 +81,10 @@ class LocalScanner extends Scanner
      */
     public function getFingerprint()
     {
-        return [static::class, $this->basePath];
+        $fingerprint = parent::getFingerprint();
+        // The base path can contain placeholders, that are resolved per context
+        $fingerprint[] = $this->basePath;
+        return $fingerprint;
     }
 
     /**

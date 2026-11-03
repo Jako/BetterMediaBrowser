@@ -43,7 +43,7 @@ class OnManagerPageBeforeRender extends Plugin
             }
             // Set the config immediately, so that it is available when the script initializes on Ext.onReady
             $this->modx->controller->addHtml('<script type="text/javascript">
-        BetterMediaBrowser.config = ' . json_encode($this->bettermediabrowser->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . ';
+        BetterMediaBrowser.config = ' . json_encode($this->getClientConfig(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . ';
         </script>');
             if ($this->bettermediabrowser->getOption('debug') && ($this->bettermediabrowser->getOption('assetsUrl') != MODX_ASSETS_URL . 'components/bettermediabrowser/')) {
                 $this->modx->controller->addCss($cssSourceUrl . 'bettermediabrowser.css?v=v' . $this->bettermediabrowser->version);
@@ -51,5 +51,19 @@ class OnManagerPageBeforeRender extends Plugin
                 $this->modx->controller->addCss($cssUrl . 'bettermediabrowser.min.css?v=v' . $this->bettermediabrowser->version);
             }
         }
+    }
+
+    /**
+     * Only the options used by the manager scripts, so that no server paths are exposed.
+     *
+     * @return array
+     */
+    protected function getClientConfig()
+    {
+        $config = [];
+        foreach (['version', 'assetsUrl', 'connectorUrl', 'debug', 'modxversion', 'drag_drop_enabled', 'search_enabled'] as $key) {
+            $config[$key] = $this->bettermediabrowser->getOption($key);
+        }
+        return $config;
     }
 }

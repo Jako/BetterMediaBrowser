@@ -55,6 +55,7 @@ abstract class Scanner
      */
     public function getFingerprint()
     {
-        return [static::class];
+        // The stored Media Source properties (i.e. bucket, base path) change the scanned files
+        return [static::class, get_class($this->source), $this->source->get('properties')];
     }
 }
