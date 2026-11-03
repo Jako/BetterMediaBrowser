@@ -34,7 +34,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 
         break;
     case xPDOTransport::ACTION_UPGRADE:
-        $output .= '<h2>Upgrade AjaxUpload</h2>
+        $output .= '<h2>Upgrade BetterMediaBrowser</h2>
 
         <p>BetterMediaBrowser will be upgraded. This open source extra was
         developed by visions – code + digital and Treehill Studio – MODX

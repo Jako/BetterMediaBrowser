@@ -21,7 +21,7 @@ set_time_limit(0);
 const PKG_NAME = 'BetterMediaBrowser';
 const PKG_NAME_LOWER = 'bettermediabrowser';
 const PKG_VERSION = '1.2.0';
-const PKG_RELEASE = 'b1';
+const PKG_RELEASE = 'b2';
 const PKG_AUTHOR = 'Chris Menzi/Thomas Jakobi';
 const PKG_DESCRIPTION = 'Media Browser Extensions for MODX';
 

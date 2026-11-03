@@ -33,6 +33,6 @@ $_lang['bettermediabrowser.open_in_browser'] = 'Openen in MODX-browser';
 $_lang['bettermediabrowser.remove_selected_confirm'] = '[[+count]] geselecteerde bestanden echt verwijderen?';
 $_lang['bettermediabrowser.search_filename'] = 'Bestandsnaam zoeken …';
 $_lang['bettermediabrowser.search_files'] = 'Bestanden zoeken';
-$_lang['bettermediabrowser.source_type'] = 'BetterMediaBrowser bestandssysteem';
+$_lang['bettermediabrowser.source_type'] = 'BetterMediaSource';
 $_lang['bettermediabrowser.source_type_desc'] = 'Zoals de bestandssysteem-mediabron. De bestandszoekfunctie van BetterMediaBrowser doorzoekt deze direct in het bestandssysteem.';
 $_lang['bettermediabrowser.timeout'] = 'Time-out';
