@@ -33,4 +33,6 @@ $_lang['bettermediabrowser.open_in_browser'] = 'Открыть в браузер
 $_lang['bettermediabrowser.remove_selected_confirm'] = 'Действительно удалить выбранные файлы ([[+count]])?';
 $_lang['bettermediabrowser.search_filename'] = 'Поиск по имени файла …';
 $_lang['bettermediabrowser.search_files'] = 'Поиск файлов';
+$_lang['bettermediabrowser.source_type'] = 'Файловая система BetterMediaBrowser';
+$_lang['bettermediabrowser.source_type_desc'] = 'Как источник файлов «Файловая система». Поиск файлов BetterMediaBrowser сканирует его непосредственно в файловой системе.';
 $_lang['bettermediabrowser.timeout'] = 'Превышено время ожидания';

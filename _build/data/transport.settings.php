@@ -52,6 +52,13 @@ $definitions = [
         'namespace' => 'bettermediabrowser',
         'area' => 'search',
     ],
+    [
+        'key' => 'bettermediabrowser.list_cache_lifetime',
+        'value' => '300',
+        'xtype' => 'numberfield',
+        'namespace' => 'bettermediabrowser',
+        'area' => 'mediasource',
+    ],
 ];
 
 $settings = [];

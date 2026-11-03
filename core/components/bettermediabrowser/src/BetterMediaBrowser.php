@@ -43,7 +43,7 @@ class BetterMediaBrowser
      * The version
      * @var string $version
      */
-    public $version = '1.1.0';
+    public $version = '1.2.0-b1';
 
     /**
      * The class options
@@ -149,6 +149,7 @@ class BetterMediaBrowser
             'search_min_length' => (int)$this->getOption('search_min_length', $options, 2),
             'search_max_results' => (int)$this->getOption('search_max_results', $options, 500),
             'excluded_folders' => $this->getExplodedOption('excluded_folders', $options, '.*/,_*/,core/,components/,connectors/,manager/'),
+            'list_cache_lifetime' => (int)$this->getOption('list_cache_lifetime', $options, 300),
         ];
     }
 

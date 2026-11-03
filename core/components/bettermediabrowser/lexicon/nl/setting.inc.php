@@ -6,6 +6,7 @@
  * @subpackage lexicon
  */
 
+$_lang['area_mediasource'] = 'Mediabron';
 $_lang['area_search'] = 'Zoeken';
 $_lang['setting_bettermediabrowser.debug'] = 'Debug';
 $_lang['setting_bettermediabrowser.debug_desc'] = 'Debuginformatie in het MODX-foutenlogboek opslaan.';
@@ -15,6 +16,8 @@ $_lang['setting_bettermediabrowser.enabled'] = 'Ingeschakeld';
 $_lang['setting_bettermediabrowser.enabled_desc'] = 'De BetterMediaBrowser-extensie inschakelen.';
 $_lang['setting_bettermediabrowser.excluded_folders'] = 'Uitgesloten mappen';
 $_lang['setting_bettermediabrowser.excluded_folders_desc'] = 'Kommagescheiden lijst van mappen die van de zoekresultaten worden uitgesloten.';
+$_lang['setting_bettermediabrowser.list_cache_lifetime'] = 'Levensduur lijstcache';
+$_lang['setting_bettermediabrowser.list_cache_lifetime_desc'] = 'Seconden dat de mediabron „BetterMediaBrowser bestandssysteem” de maplijsten van de mediabrowser in de cache bewaart. Buiten MODX toegevoegde, verwijderde of hernoemde bestanden worden direct getoond, buiten MODX vervangen bestanden na deze tijd. 0 schakelt de cache uit.';
 $_lang['setting_bettermediabrowser.search_enabled'] = 'Zoeken inschakelen';
 $_lang['setting_bettermediabrowser.search_enabled_desc'] = 'De BetterMediaBrowser-bestandszoekfunctie inschakelen.';
 $_lang['setting_bettermediabrowser.search_max_results'] = 'Max. resultaten';

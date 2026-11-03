@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.2.0
+
+### Added
+
+- BetterMediaBrowser File System media source type (BetterMediaSource), that extends the file system media source and clears its file search cache on each file change
+- Cache the folder lists of the media browser in the BetterMediaBrowser File System media source (list_cache_lifetime system setting)
 
 ### Fixed
 

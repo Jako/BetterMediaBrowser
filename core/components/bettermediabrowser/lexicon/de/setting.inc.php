@@ -6,6 +6,7 @@
  * @subpackage lexicon
  */
 
+$_lang['area_mediasource'] = 'Medienquelle';
 $_lang['area_search'] = 'Suche';
 $_lang['setting_bettermediabrowser.debug'] = 'Debug';
 $_lang['setting_bettermediabrowser.debug_desc'] = 'Debug-Informationen im MODX Fehlerprotokoll ausgeben.';
@@ -15,6 +16,8 @@ $_lang['setting_bettermediabrowser.enabled'] = 'Aktiviert';
 $_lang['setting_bettermediabrowser.enabled_desc'] = 'Die BetterMediaBrowser-Erweiterung aktivieren.';
 $_lang['setting_bettermediabrowser.excluded_folders'] = 'Verzeichnisse ausschließen';
 $_lang['setting_bettermediabrowser.excluded_folders_desc'] = 'Kommaseparierte Liste von Ordnern, die vom Suchergebnis ausgeschlossen werden sollen.';
+$_lang['setting_bettermediabrowser.list_cache_lifetime'] = 'Lebensdauer des Listen-Caches';
+$_lang['setting_bettermediabrowser.list_cache_lifetime_desc'] = 'Sekunden, die die Medienquelle „BetterMediaBrowser Dateisystem“ die Ordnerlisten des Medien-Browsers zwischenspeichert. Außerhalb von MODX hinzugefügte, gelöschte oder umbenannte Dateien werden sofort angezeigt, außerhalb von MODX ersetzte Dateien nach dieser Zeit. 0 deaktiviert den Cache.';
 $_lang['setting_bettermediabrowser.search_enabled'] = 'Suche aktivieren';
 $_lang['setting_bettermediabrowser.search_enabled_desc'] = 'Die BetterMediaBrowser-Dateisuche aktivieren.';
 $_lang['setting_bettermediabrowser.search_max_results'] = 'Max. Ergebnisse';

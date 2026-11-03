@@ -33,4 +33,6 @@ $_lang['bettermediabrowser.open_in_browser'] = 'Open in MODX Browser';
 $_lang['bettermediabrowser.remove_selected_confirm'] = 'Really delete [[+count]] selected files?';
 $_lang['bettermediabrowser.search_filename'] = 'Search filename …';
 $_lang['bettermediabrowser.search_files'] = 'Search Files';
+$_lang['bettermediabrowser.source_type'] = 'BetterMediaBrowser File System';
+$_lang['bettermediabrowser.source_type_desc'] = 'Like the file system media source. The BetterMediaBrowser file search scans it directly in the file system.';
 $_lang['bettermediabrowser.timeout'] = 'Timeout';
