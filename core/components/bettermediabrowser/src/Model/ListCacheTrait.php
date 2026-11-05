@@ -14,37 +14,50 @@ namespace Visions\BetterMediaBrowser\Model;
  * Caches the folder lists of the media browser tree (getContainerList) and
  * view (getObjectsInContainer). Building a list reads the image sizes and
  * builds the preview URLs and context menus of all files, which takes about
- * half a second for a folder with a few hundred images.
+ * half a second for a folder with a few hundred images in the core file
+ * system media source (FastListTrait makes it much faster in MODX 3).
  *
  * The cache key contains everything the list depends on:
  * - the cache generation of the media source, that changes with every file
- *   change in MODX (SearchCacheTrait, plugin events, clearing the MODX cache)
+ *   change in MODX (SearchCacheTrait, plugin events)
  * - the modification time of the folder, that changes, when a file is added,
  *   removed or renamed outside of MODX
  * - the user (permissions in the context menus), the context, the manager
  *   language and the media source properties
  *
  * A file, whose content is replaced outside of MODX, is shown with its old
- * size and image dimensions until the cache lifetime ends.
+ * size and image dimensions until the cache lifetime ends. The menu entry
+ * "Clear media browser cache" removes all cached lists.
  *
  * Requires SearchCacheTrait for getBetterMediaBrowser().
  */
 trait ListCacheTrait
 {
     /**
-     * Folders with more entries are not cached, to keep the cache entries small.
+     * Larger lists are not cached. 1 MB (decimal) stays below the default item
+     * size limit of Memcached (1 MiB), including its item overhead. That is
+     * about 600 images in the tree and 800 images in the file view, more for
+     * other files.
      *
-     * @var int
+     * @var int Bytes of the serialized list
      */
-    protected static $listCacheMaxEntries = 2000;
+    protected static int $listCacheMaxSize = 1000000;
+
+    /**
+     * Every list entry has at least this size, so larger folders are not
+     * cached without serializing the list.
+     *
+     * @var int Bytes
+     */
+    protected static int $listCacheMinEntrySize = 256;
 
     /**
      * @param string $path
      * @return array
      */
-    public function getContainerList($path)
+    public function getContainerList($path): array
     {
-        $cacheKey = $this->getListCacheKey('tree', $path);
+        $cacheKey = $this->getListCacheKey('tree', (string)$path);
         $list = $this->getListCache($cacheKey);
         if ($list === null) {
             $list = parent::getContainerList($path);
@@ -57,9 +70,9 @@ trait ListCacheTrait
      * @param string $path
      * @return array
      */
-    public function getObjectsInContainer($path)
+    public function getObjectsInContainer($path): array
     {
-        $cacheKey = $this->getListCacheKey('view', $path);
+        $cacheKey = $this->getListCacheKey('view', (string)$path);
         $list = $this->getListCache($cacheKey);
         if ($list === null) {
             $list = parent::getObjectsInContainer($path);
@@ -75,7 +88,7 @@ trait ListCacheTrait
      * @param string $path
      * @return string|null Null, if the list can't be cached
      */
-    protected function getListCacheKey($type, $path)
+    protected function getListCacheKey(string $type, string $path): ?string
     {
         $bettermediabrowser = $this->getBetterMediaBrowser();
         if (!$bettermediabrowser || $this->getListCacheLifetime() <= 0) {
@@ -96,7 +109,7 @@ trait ListCacheTrait
         $sourceId = (int)$this->get('id');
         return 'source_' . $sourceId . '_list_' . md5(json_encode([
                 $type,
-                (string)$path,
+                $path,
                 $folderTime,
                 $bettermediabrowser->getSearchCache()->getGeneration($sourceId),
                 $this->xpdo->user ? (int)$this->xpdo->user->get('id') : 0,
@@ -110,7 +123,7 @@ trait ListCacheTrait
      * @param string|null $cacheKey
      * @return array|null Null on a cache miss
      */
-    protected function getListCache($cacheKey)
+    protected function getListCache(?string $cacheKey): ?array
     {
         if ($cacheKey === null) {
             return null;
@@ -126,22 +139,36 @@ trait ListCacheTrait
      * @param mixed $list
      * @return void
      */
-    protected function setListCache($cacheKey, $list)
+    protected function setListCache(?string $cacheKey, $list): void
     {
-        if ($cacheKey === null || !is_array($list) || count($list) > static::$listCacheMaxEntries) {
+        if ($cacheKey === null || !is_array($list)) {
             return;
         }
         $errors = $this->getErrors();
-        if (!empty($errors)) {
+        if (!empty($errors) || !$this->isListCacheable($list)) {
             return;
         }
         $this->getBetterMediaBrowser()->getSearchCache()->set($cacheKey, $list, $this->getListCacheLifetime());
     }
 
     /**
+     * Is the list small enough for the cache?
+     *
+     * @param array $list
+     * @return bool
+     */
+    protected function isListCacheable(array $list): bool
+    {
+        if (count($list) * static::$listCacheMinEntrySize > static::$listCacheMaxSize) {
+            return false;
+        }
+        return strlen(serialize($list)) <= static::$listCacheMaxSize;
+    }
+
+    /**
      * @return int Lifetime in seconds, 0 disables the cache
      */
-    protected function getListCacheLifetime()
+    protected function getListCacheLifetime(): int
     {
         $bettermediabrowser = $this->getBetterMediaBrowser();
         return $bettermediabrowser ? max(0, (int)$bettermediabrowser->getOption('list_cache_lifetime')) : 0;
@@ -153,10 +180,10 @@ trait ListCacheTrait
      * @param string $path Folder path relative to the media source base path
      * @return int|null Null, if the path is not a folder
      */
-    protected function getListFolderTime($path)
+    protected function getListFolderTime(string $path): ?int
     {
-        $basePath = rtrim(str_replace('\\', '/', (string)$this->getBasePath()), '/') . '/';
-        foreach ([(string)$path, rawurldecode((string)$path)] as $candidate) {
+        $basePath = rtrim(str_replace('\\', '/', $this->getBasePath()), '/') . '/';
+        foreach ([$path, rawurldecode($path)] as $candidate) {
             $candidate = trim(str_replace('\\', '/', $candidate), '/');
             if (strpos('/' . $candidate . '/', '/../') !== false) {
                 return null;

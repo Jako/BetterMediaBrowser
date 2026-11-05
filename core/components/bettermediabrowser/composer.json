@@ -1,7 +1,7 @@
 {
   "name": "visions/bettermediabrowser",
   "description": "Media Browser Extensions for MODX",
-  "version": "1.2.0-b2",
+  "version": "1.2.0",
   "authors": [
     {
       "name": "Chris Menzi",
@@ -22,7 +22,10 @@
   },
   "require": {
     "php": ">=7.4",
-    "ext-curl": "*"
+    "ext-json": "*"
+  },
+  "suggest": {
+    "ext-mbstring": "Case-insensitive search and extension matching of non-ASCII file names"
   },
   "autoload": {
     "psr-4": {

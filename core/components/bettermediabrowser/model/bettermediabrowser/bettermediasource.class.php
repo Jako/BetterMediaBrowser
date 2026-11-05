@@ -31,15 +31,27 @@ class BetterMediaSource extends modFileMediaSource
      * @param string $point
      * @return bool
      */
-    public function moveObject($from, $to, $point = 'append')
+    public function moveObject($from, $to, $point = 'append'): bool
     {
         return $this->clearSearchCacheAfter(parent::moveObject($from, $to, $point));
     }
 
     /**
+     * Clears the cache, because the permissions are shown in the folder lists.
+     *
+     * @param string $directoryPath
+     * @param string $mode
+     * @return bool
+     */
+    public function chmodContainer($directoryPath, $mode)
+    {
+        return $this->clearSearchCacheAfter(parent::chmodContainer($directoryPath, $mode));
+    }
+
+    /**
      * @return string
      */
-    public function getTypeName()
+    public function getTypeName(): string
     {
         $this->xpdo->lexicon->load('bettermediabrowser:default');
         return $this->xpdo->lexicon('bettermediabrowser.source_type');
@@ -48,7 +60,7 @@ class BetterMediaSource extends modFileMediaSource
     /**
      * @return string
      */
-    public function getTypeDescription()
+    public function getTypeDescription(): string
     {
         $this->xpdo->lexicon->load('bettermediabrowser:default');
         return $this->xpdo->lexicon('bettermediabrowser.source_type_desc');

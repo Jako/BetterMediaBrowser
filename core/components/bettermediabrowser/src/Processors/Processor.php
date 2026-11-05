@@ -17,10 +17,10 @@ use Visions\BetterMediaBrowser\BetterMediaBrowser;
  */
 abstract class Processor extends modProcessor
 {
-    public $languageTopics = ['bettermediabrowser:default'];
+    public array $languageTopics = ['bettermediabrowser:default'];
 
-    /** @var BetterMediaBrowser $bettermediabrowser */
-    public $bettermediabrowser;
+    /** @var BetterMediaBrowser|null $bettermediabrowser */
+    public ?BetterMediaBrowser $bettermediabrowser = null;
 
     /**
      * {@inheritDoc}
@@ -39,7 +39,7 @@ abstract class Processor extends modProcessor
      * {@inheritDoc}
      * @return bool
      */
-    public function checkPermissions()
+    public function checkPermissions(): bool
     {
         if ((!defined('MODX_REQP') || MODX_REQP !== false) && !empty($this->permission)) {
             if (is_array($this->permission)) {
@@ -57,6 +57,15 @@ abstract class Processor extends modProcessor
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return array
+     */
+    public function getLanguageTopics()
+    {
+        return $this->languageTopics;
+    }
+
     abstract public function process();
 
     /**
@@ -65,7 +74,7 @@ abstract class Processor extends modProcessor
      * @param mixed $default
      * @return bool
      */
-    public function getBooleanProperty($k, $default = null)
+    public function getBooleanProperty(string $k, $default = null): bool
     {
         return ($this->getProperty($k, $default) === 'true' || $this->getProperty($k, $default) === true || $this->getProperty($k, $default) === '1' || $this->getProperty($k, $default) === 1);
     }

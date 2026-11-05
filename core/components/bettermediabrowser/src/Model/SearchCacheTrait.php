@@ -8,6 +8,8 @@
 
 namespace Visions\BetterMediaBrowser\Model;
 
+use Visions\BetterMediaBrowser\BetterMediaBrowser;
+
 /**
  * Trait SearchCacheTrait
  *
@@ -25,7 +27,7 @@ trait SearchCacheTrait
      * @param int|null $sourceId Null clears the cache of this media source
      * @return void
      */
-    protected function clearSearchCache($sourceId = null)
+    protected function clearSearchCache(?int $sourceId = null): void
     {
         $bettermediabrowser = $this->getBetterMediaBrowser();
         if ($bettermediabrowser) {
@@ -36,15 +38,15 @@ trait SearchCacheTrait
     /**
      * Get the BetterMediaBrowser service.
      *
-     * @return \Visions\BetterMediaBrowser\BetterMediaBrowser|null
+     * @return BetterMediaBrowser|null
      */
-    protected function getBetterMediaBrowser()
+    protected function getBetterMediaBrowser(): ?BetterMediaBrowser
     {
         $corePath = $this->xpdo->getOption('bettermediabrowser.core_path', null, $this->xpdo->getOption('core_path') . 'components/bettermediabrowser/');
         $bettermediabrowser = $this->xpdo->getService('bettermediabrowser', 'BetterMediaBrowser', $corePath . 'model/bettermediabrowser/', [
             'core_path' => $corePath
         ]);
-        return $bettermediabrowser ?: null;
+        return $bettermediabrowser instanceof BetterMediaBrowser ? $bettermediabrowser : null;
     }
 
     /**
@@ -66,27 +68,33 @@ trait SearchCacheTrait
         return $this->clearSearchCacheAfter(parent::createObject($objectPath, $name, $content));
     }
 
-    public function removeObject($objectPath)
+    public function updateObject($objectPath, $content)
+    {
+        // The changed size and modification time are shown in the folder lists
+        return $this->clearSearchCacheAfter(parent::updateObject($objectPath, $content));
+    }
+
+    public function removeObject($objectPath): bool
     {
         return $this->clearSearchCacheAfter(parent::removeObject($objectPath));
     }
 
-    public function renameObject($oldPath, $newName)
+    public function renameObject($oldPath, $newName): bool
     {
         return $this->clearSearchCacheAfter(parent::renameObject($oldPath, $newName));
     }
 
-    public function removeContainer($path)
+    public function removeContainer($path): bool
     {
         return $this->clearSearchCacheAfter(parent::removeContainer($path));
     }
 
-    public function renameContainer($oldPath, $newName)
+    public function renameContainer($oldPath, $newName): bool
     {
         return $this->clearSearchCacheAfter(parent::renameContainer($oldPath, $newName));
     }
 
-    public function uploadObjectsToContainer($container, array $objects = [])
+    public function uploadObjectsToContainer($container, array $objects = []): bool
     {
         return $this->clearSearchCacheAfter(parent::uploadObjectsToContainer($container, $objects));
     }

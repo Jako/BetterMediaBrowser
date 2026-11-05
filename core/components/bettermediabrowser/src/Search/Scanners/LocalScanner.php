@@ -22,22 +22,22 @@ use Visions\BetterMediaBrowser\Search\ResultCollector;
 class LocalScanner extends Scanner
 {
     /** @var string */
-    protected $basePath;
+    protected string $basePath;
 
     /** @var bool */
-    protected $skipLinks;
+    protected bool $skipLinks;
 
     /** @var array */
-    protected $visitedLinks = [];
+    protected array $visitedLinks = [];
 
     /**
      * LocalScanner constructor
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @param FileFilter $filter
      * @param string $basePath Absolute base path with trailing slash
      */
-    public function __construct($source, FileFilter $filter, $basePath)
+    public function __construct(object $source, FileFilter $filter, string $basePath)
     {
         parent::__construct($source, $filter);
         $this->basePath = $basePath;
@@ -48,11 +48,11 @@ class LocalScanner extends Scanner
     /**
      * Create the scanner, if the Media Source is a local file Media Source.
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @param FileFilter $filter
      * @return self|null
      */
-    public static function create($source, FileFilter $filter)
+    public static function create(object $source, FileFilter $filter): ?self
     {
         if (!self::isLocalFileSource($source)) {
             return null;
@@ -70,7 +70,7 @@ class LocalScanner extends Scanner
      * @param ResultCollector $collector
      * @return void
      */
-    public function scan(ResultCollector $collector)
+    public function scan(ResultCollector $collector): void
     {
         $this->visitedLinks = [];
         $this->scanDirectory($collector, '', 0);
@@ -79,7 +79,7 @@ class LocalScanner extends Scanner
     /**
      * @return array
      */
-    public function getFingerprint()
+    public function getFingerprint(): array
     {
         $fingerprint = parent::getFingerprint();
         // The base path can contain placeholders, that are resolved per context
@@ -90,10 +90,10 @@ class LocalScanner extends Scanner
     /**
      * Is the Media Source a local file Media Source?
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @return bool
      */
-    protected static function isLocalFileSource($source)
+    protected static function isLocalFileSource(object $source): bool
     {
         foreach (['MODX\Revolution\Sources\modFileMediaSource', 'modFileMediaSource'] as $class) {
             if (class_exists($class, false) && $source instanceof $class) {
@@ -111,7 +111,7 @@ class LocalScanner extends Scanner
      * @param int $depth
      * @return void
      */
-    protected function scanDirectory(ResultCollector $collector, $path, $depth)
+    protected function scanDirectory(ResultCollector $collector, string $path, int $depth): void
     {
         if ($collector->isFull() || $depth > self::MAX_DEPTH) {
             return;
@@ -163,9 +163,6 @@ class LocalScanner extends Scanner
 
         foreach ($directories as $directoryPath) {
             $this->scanDirectory($collector, $directoryPath, $depth + 1);
-            if ($collector->isFull()) {
-                return;
-            }
         }
     }
 
@@ -175,7 +172,7 @@ class LocalScanner extends Scanner
      * @param string $filePathName
      * @return bool
      */
-    protected function isLinkLoop($filePathName)
+    protected function isLinkLoop(string $filePathName): bool
     {
         if (!is_link($filePathName)) {
             return false;

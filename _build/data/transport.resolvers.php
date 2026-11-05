@@ -1,6 +1,7 @@
 <?php
 
 $resolvers = [
+    'cleanup',
     'mediasource',
     'treehillstudio'
 ];

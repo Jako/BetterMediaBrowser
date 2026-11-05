@@ -90,7 +90,14 @@
                 width: 340,
                 emptyText: _('bettermediabrowser.search_filename'),
                 submitValue: false,
+                enableKeyEvents: true,
                 listeners: {
+                    keyup: {
+                        // Search while typing, after a short pause
+                        fn: this.liveSearchFiles,
+                        buffer: 300,
+                        scope: this
+                    },
                     render: {
                         fn: function (cmp) {
                             new Ext.KeyMap(cmp.getEl(), {
@@ -134,6 +141,16 @@
         });
 
         BetterMediaBrowser.grid.SearchFilesGrid.superclass.constructor.call(this, config);
+
+        // Search while typing only, if the server answers from the index of all
+        // files. Large media sources without an index are scanned on each search.
+        this.liveSearch = false;
+        this.getStore().on('load', function (store) {
+            var data = store.reader ? store.reader.jsonData : null;
+            if (data && typeof data.indexed === 'boolean') {
+                this.liveSearch = data.indexed;
+            }
+        }, this);
     };
 
     Ext.extend(BetterMediaBrowser.grid.SearchFilesGrid, MODx.grid.Grid, {
@@ -141,8 +158,21 @@
             var toolbar = this.getTopToolbar();
             var field = toolbar.getComponent('filter-search');
             var store = this.getStore();
-            store.baseParams.query = String(field.getValue() || '');
+            store.baseParams.query = String(field.getValue() || '').trim();
             this.getBottomToolbar().changePage(1);
+        },
+        liveSearchFiles: function () {
+            if (!this.liveSearch || this.isDestroyed) {
+                return;
+            }
+            var field = this.getTopToolbar().getComponent('filter-search');
+            var query = String(field.getValue() || '').trim();
+            var minLength = Math.max(2, parseInt(BetterMediaBrowser.config.search_min_length, 10) || 2);
+            // A running request for an older query is aborted by the store
+            if (query === this.getStore().baseParams.query || (query !== '' && query.length < minLength)) {
+                return;
+            }
+            this.searchFiles();
         },
         clearSearch: function () {
             var toolbar = this.getTopToolbar();

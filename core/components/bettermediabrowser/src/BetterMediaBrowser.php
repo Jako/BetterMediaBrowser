@@ -25,43 +25,43 @@ class BetterMediaBrowser
      * A reference to the modX instance
      * @var modX $modx
      */
-    public $modx;
+    public modX $modx;
 
     /**
      * The namespace
      * @var string $namespace
      */
-    public $namespace = 'bettermediabrowser';
+    public string $namespace = 'bettermediabrowser';
 
     /**
      * The package name
      * @var string $packageName
      */
-    public $packageName = 'BetterMediaBrowser';
+    public string $packageName = 'BetterMediaBrowser';
 
     /**
      * The version
      * @var string $version
      */
-    public $version = '1.2.0-b2';
+    public string $version = '1.2.0';
 
     /**
      * The class options
      * @var array $options
      */
-    public $options = [];
+    public array $options = [];
 
     /**
      * The class cache options
      * @var array $cacheOptions
      */
-    public $cacheOptions;
+    public array $cacheOptions = [];
 
     /**
      * The file search cache
      * @var SearchCache|null $searchCache
      */
-    protected $searchCache;
+    protected ?SearchCache $searchCache = null;
 
     /**
      * BetterMediaBrowser constructor
@@ -69,7 +69,7 @@ class BetterMediaBrowser
      * @param modX $modx A reference to the modX instance.
      * @param array $options An array of options. Optional.
      */
-    public function __construct(modX &$modx, $options = [])
+    public function __construct(modX &$modx, array $options = [])
     {
         $this->modx =& $modx;
 
@@ -88,7 +88,7 @@ class BetterMediaBrowser
      * @param array $options
      * @return array
      */
-    protected function getPathOptions($options)
+    protected function getPathOptions(array $options): array
     {
         $corePath = $this->getOption('core_path', $options, $this->modx->getOption('core_path', null, MODX_CORE_PATH) . 'components/' . $this->namespace . '/');
         $assetsPath = $this->getOption('assets_path', $options, $this->modx->getOption('assets_path', null, MODX_ASSETS_PATH) . 'components/' . $this->namespace . '/');
@@ -121,7 +121,7 @@ class BetterMediaBrowser
      *
      * @return array
      */
-    protected function getCacheOptions()
+    protected function getCacheOptions(): array
     {
         return [
             xPDO::OPT_CACHE_KEY => $this->namespace,
@@ -136,7 +136,7 @@ class BetterMediaBrowser
      * @param array $options
      * @return array
      */
-    protected function getDefaultOptions($options)
+    protected function getDefaultOptions(array $options): array
     {
         $modxversion = $this->modx->getVersionData();
 
@@ -162,11 +162,11 @@ class BetterMediaBrowser
      * namespaced system setting; by default this value is null.
      * @return mixed The option value or the default value specified.
      */
-    public function getOption($key, $options = [], $default = null)
+    public function getOption(string $key, array $options = [], $default = null)
     {
         $option = $default;
-        if (!empty($key) && is_string($key)) {
-            if (is_array($options) && array_key_exists($key, $options)) {
+        if (!empty($key)) {
+            if (array_key_exists($key, $options)) {
                 $option = $options[$key];
             } elseif (array_key_exists($key, $this->options)) {
                 $option = $this->options[$key];
@@ -185,7 +185,7 @@ class BetterMediaBrowser
      * @param mixed $default
      * @return bool
      */
-    public function getBooleanOption($key, $options = [], $default = null)
+    public function getBooleanOption(string $key, array $options = [], $default = null): bool
     {
         $option = $this->getOption($key, $options, $default);
         return in_array($option, ['true', true, '1', 1], true);
@@ -199,7 +199,7 @@ class BetterMediaBrowser
      * @param mixed $default
      * @return array
      */
-    public function getExplodedOption($key, $options = [], $default = null)
+    public function getExplodedOption(string $key, array $options = [], $default = null): array
     {
         $value = (string)$this->getOption($key, $options, $default);
         return array_values(array_filter(array_map('trim', explode(',', $value)), 'strlen'));
@@ -210,7 +210,7 @@ class BetterMediaBrowser
      *
      * @return SearchCache
      */
-    public function getSearchCache()
+    public function getSearchCache(): SearchCache
     {
         if (!$this->searchCache) {
             $this->searchCache = new SearchCache($this->modx, $this->cacheOptions);

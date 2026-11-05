@@ -8,6 +8,8 @@
 
 namespace Visions\BetterMediaBrowser\Search\Scanners;
 
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
 use modMediaSource;
 use Visions\BetterMediaBrowser\Search\FileFilter;
 use Visions\BetterMediaBrowser\Search\Path;
@@ -24,20 +26,20 @@ use Visions\BetterMediaBrowser\Search\ResultCollector;
  */
 class FilesystemScanner extends Scanner
 {
-    /** @var \League\Flysystem\FilesystemOperator */
-    protected $filesystem;
+    /** @var FilesystemOperator|object */
+    protected object $filesystem;
 
     /** @var array */
-    protected $listableDirectories = [];
+    protected array $listableDirectories = [];
 
     /**
      * FilesystemScanner constructor
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @param FileFilter $filter
-     * @param \League\Flysystem\FilesystemOperator $filesystem
+     * @param FilesystemOperator|object $filesystem
      */
-    public function __construct($source, FileFilter $filter, $filesystem)
+    public function __construct(object $source, FileFilter $filter, object $filesystem)
     {
         parent::__construct($source, $filter);
         $this->filesystem = $filesystem;
@@ -46,11 +48,11 @@ class FilesystemScanner extends Scanner
     /**
      * Create the scanner, if the Media Source provides a Flysystem filesystem.
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @param FileFilter $filter
      * @return self|null
      */
-    public static function create($source, FileFilter $filter)
+    public static function create(object $source, FileFilter $filter): ?self
     {
         if (!method_exists($source, 'getFilesystem')) {
             return null;
@@ -65,8 +67,9 @@ class FilesystemScanner extends Scanner
     /**
      * @param ResultCollector $collector
      * @return void
+     * @throws FilesystemException If the Media Source can't be listed
      */
-    public function scan(ResultCollector $collector)
+    public function scan(ResultCollector $collector): void
     {
         foreach ($this->filesystem->listContents('', true) as $item) {
             if (!$item->isFile()) {
@@ -97,7 +100,7 @@ class FilesystemScanner extends Scanner
      * @param string $directory Directory path with trailing slash
      * @return bool
      */
-    protected function isDirectoryListable($directory)
+    protected function isDirectoryListable(string $directory): bool
     {
         if (!isset($this->listableDirectories[$directory])) {
             $parent = Path::parent($directory);

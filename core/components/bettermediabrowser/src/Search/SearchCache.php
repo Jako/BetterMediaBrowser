@@ -9,6 +9,7 @@
 namespace Visions\BetterMediaBrowser\Search;
 
 use modX;
+use xPDO;
 
 /**
  * Class SearchCache
@@ -20,10 +21,10 @@ use modX;
 class SearchCache
 {
     /** @var modX */
-    protected $modx;
+    protected modX $modx;
 
     /** @var array */
-    protected $cacheOptions;
+    protected array $cacheOptions;
 
     /**
      * SearchCache constructor
@@ -41,7 +42,7 @@ class SearchCache
      * @param string $key
      * @return mixed
      */
-    public function get($key)
+    public function get(string $key)
     {
         return $this->modx->getCacheManager()->get($key, $this->cacheOptions);
     }
@@ -52,7 +53,7 @@ class SearchCache
      * @param int $lifetime
      * @return void
      */
-    public function set($key, $value, $lifetime)
+    public function set(string $key, $value, int $lifetime): void
     {
         $this->modx->getCacheManager()->set($key, $value, $lifetime, $this->cacheOptions);
     }
@@ -63,7 +64,7 @@ class SearchCache
      * @param int $sourceId
      * @return string
      */
-    public function getGeneration($sourceId)
+    public function getGeneration(int $sourceId): string
     {
         $generation = $this->get($this->getGenerationKey($sourceId));
         return is_string($generation) ? $generation : '';
@@ -79,7 +80,7 @@ class SearchCache
      * @param int $sourceId
      * @return void
      */
-    public function clear($sourceId)
+    public function clear(int $sourceId): void
     {
         $this->set($this->getGenerationKey($sourceId), uniqid('', true), 0);
     }
@@ -87,19 +88,63 @@ class SearchCache
     /**
      * Remove the cache of all Media Sources.
      *
+     * The file cache handler deletes the files of the bettermediabrowser cache
+     * partition. All other cache handlers (Memcache, Memcached, Redis, APC,
+     * WinCache) would empty the whole cache storage, including the caches of
+     * MODX and other applications. For them, all Media Sources get a new
+     * cache generation instead, and the old entries expire by their lifetime.
+     *
      * @return bool
      */
-    public function clearAll()
+    public function clearAll(): bool
     {
-        return $this->modx->getCacheManager()->clean($this->cacheOptions);
+        if (!$this->isFileCache()) {
+            foreach ($this->getSourceIds() as $sourceId) {
+                $this->clear($sourceId);
+            }
+            return true;
+        }
+
+        if ($this->modx->getCacheManager()->clean($this->cacheOptions)) {
+            return true;
+        }
+        // The file cache handler fails, if nothing was cached yet
+        return !is_dir($this->modx->getCachePath() . $this->cacheOptions[xPDO::OPT_CACHE_KEY] . '/');
+    }
+
+    /**
+     * Does the cache partition use the file cache handler?
+     *
+     * @return bool
+     */
+    protected function isFileCache(): bool
+    {
+        $handler = (string)($this->cacheOptions[xPDO::OPT_CACHE_HANDLER] ?? '');
+        return $handler === '' || stripos($handler, 'FileCache') !== false;
+    }
+
+    /**
+     * Get the IDs of all Media Sources.
+     *
+     * @return int[]
+     */
+    protected function getSourceIds(): array
+    {
+        $class = class_exists('MODX\Revolution\Sources\modMediaSource') ? 'MODX\Revolution\Sources\modMediaSource' : 'sources.modMediaSource';
+        $query = $this->modx->newQuery($class);
+        $query->select($this->modx->getSelectColumns($class, '', '', ['id']));
+        if (!$query->prepare() || !$query->stmt->execute()) {
+            return [];
+        }
+        return array_map('intval', $query->stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     /**
      * @param int $sourceId
      * @return string
      */
-    protected function getGenerationKey($sourceId)
+    protected function getGenerationKey(int $sourceId): string
     {
-        return 'source_' . (int)$sourceId . '_generation';
+        return 'source_' . $sourceId . '_generation';
     }
 }

@@ -24,33 +24,33 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     const PAGE_LIMIT = 20;
     const PAGE_LIMIT_MAX = 100;
 
-    /** @var modMediaSource */
-    public $source;
+    /** @var modMediaSource|object|null */
+    public ?object $source = null;
 
     /** @var string */
-    protected $query = '';
+    protected string $query = '';
 
     /** @var int */
-    protected $minLength = 2;
+    protected int $minLength = 2;
 
     /** @var int */
-    protected $maxResults = self::RESULTS_LIMIT;
+    protected int $maxResults = self::RESULTS_LIMIT;
 
-    /** @var FileSearch */
-    protected $search;
+    /** @var FileSearch|null */
+    protected ?FileSearch $search = null;
 
     /** @var array Extensions of the images, that get a thumbnail, as keys */
-    protected $thumbnailExtensions = [];
+    protected array $thumbnailExtensions = [];
 
     /** @var int Output buffer level before the processor started its buffer */
-    protected $outputLevel = 0;
+    protected int $outputLevel = 0;
 
     /**
      * Same manager permission as the core file-listing processor.
      *
      * @return bool
      */
-    public function checkPermissions()
+    public function checkPermissions(): bool
     {
         return $this->modx->hasPermission('file_list');
     }
@@ -58,9 +58,9 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
     /**
      * @return array
      */
-    public function getLanguageTopics()
+    public function getLanguageTopics(): array
     {
-        return ['file', 'source'];
+        return array_merge(parent::getLanguageTopics(), ['file', 'source']);
     }
 
     /**
@@ -117,11 +117,12 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
 
     /**
      * @return string
+     * @throws Throwable If the file search fails
      */
-    public function process()
+    public function process(): string
     {
         if (!$this->isSearchable() || !$this->search) {
-            return $this->outputArray([], 0);
+            return $this->outputResults([], 0);
         }
 
         $results = $this->search->search($this->query);
@@ -138,7 +139,30 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
             $list[] = $this->formatResult($result);
         }
 
-        return $this->outputArray($list, count($results));
+        return $this->outputResults($list, count($results), $this->search->isIndexed());
+    }
+
+    /**
+     * Output the results like outputArray, with the information, whether the
+     * media source has an index of all files. The search window searches
+     * while typing only then.
+     *
+     * @param array $list
+     * @param int $total
+     * @param bool|null $indexed Null, if no search was executed
+     * @return string
+     */
+    protected function outputResults(array $list, int $total, ?bool $indexed = null): string
+    {
+        $output = [
+            'success' => true,
+            'total' => $total,
+            'results' => $list,
+        ];
+        if ($indexed !== null) {
+            $output['indexed'] = $indexed;
+        }
+        return json_encode($output, JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 
     /**
@@ -147,7 +171,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      * @param array $result [filename, path]
      * @return array
      */
-    protected function formatResult(array $result)
+    protected function formatResult(array $result): array
     {
         $extension = strtolower(pathinfo($result[0], PATHINFO_EXTENSION));
         return [
@@ -166,7 +190,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      *
      * @return array Extensions as keys
      */
-    protected function getThumbnailExtensions()
+    protected function getThumbnailExtensions(): array
     {
         $imageExtensions = $this->source->getOption('imageExtensions', $this->source->getPropertyList(), 'jpg,jpeg,png,gif,svg,webp');
         $extensions = array_filter(array_map('trim', explode(',', strtolower($imageExtensions))), 'strlen');
@@ -180,7 +204,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      *
      * @return bool
      */
-    protected function isSearchable()
+    protected function isSearchable(): bool
     {
         $length = function_exists('mb_strlen') ? mb_strlen($this->query, 'UTF-8') : strlen($this->query);
         return $length >= $this->minLength;
@@ -219,7 +243,7 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
      * reasons. The script is not terminated with exit, so that the other
      * shutdown functions still run.
      */
-    public function shutdown()
+    public function shutdown(): void
     {
         $error = error_get_last();
         $fatalErrors = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
@@ -228,7 +252,10 @@ class BetterMediaBrowserFilesSearchProcessor extends Processor
         }
 
         // Discard the partial output (i.e. a displayed PHP error), so that the response is valid JSON
-        while (ob_get_level() > $this->outputLevel && @ob_end_clean()) {
+        while (ob_get_level() > $this->outputLevel) {
+            if (!@ob_end_clean()) {
+                break;
+            }
         }
 
         $message = (isset($error['message'])) ? $error['message'] : 'Unknown Error!';

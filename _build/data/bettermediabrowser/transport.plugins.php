@@ -51,11 +51,6 @@ $definitions = [
                 'event' => 'OnFileManagerMoveObject',
                 'priority' => 0,
                 'propertyset' => 0,
-            ],
-            [
-                'event' => 'OnSiteRefresh',
-                'priority' => 0,
-                'propertyset' => 0,
             ]
         ]
     ],

@@ -15,7 +15,7 @@ Media Browser Extensions for MODX
 - Remember the most recently used subfolders of a media source and restore them the next time the source is opened
 - Keep the toolbar and the media source selector of the directory tree visible while scrolling the tree
 - Search using a search icon in the media source’s toolbar
-- Fast searches with a cached file index per media source, which is cleared automatically on file changes and when the MODX cache is cleared
+- Fast searches with a cached file index per media source, which is cleared automatically on file changes and with the Clear media browser cache menu entry
 - Display search results with thumbnails for images, file icons for other files and relative paths
 - A search hit opens the target folder in the file view, opens the folder in the directory tree, and sets the path when a file is selected
 - Compatible with MODX 2.8.x and 3.x

@@ -11,6 +11,7 @@ namespace Visions\BetterMediaBrowser\Search\Scanners;
 use modMediaSource;
 use Visions\BetterMediaBrowser\Search\FileFilter;
 use Visions\BetterMediaBrowser\Search\ResultCollector;
+use Throwable;
 
 /**
  * Class Scanner
@@ -21,19 +22,19 @@ abstract class Scanner
 {
     const MAX_DEPTH = 64;
 
-    /** @var modMediaSource */
-    protected $source;
+    /** @var modMediaSource|object */
+    protected object $source;
 
     /** @var FileFilter */
-    protected $filter;
+    protected FileFilter $filter;
 
     /**
      * Scanner constructor
      *
-     * @param modMediaSource $source An initialized Media Source
+     * @param modMediaSource|object $source An initialized Media Source
      * @param FileFilter $filter
      */
-    public function __construct($source, FileFilter $filter)
+    public function __construct(object $source, FileFilter $filter)
     {
         $this->source = $source;
         $this->filter = $filter;
@@ -44,16 +45,16 @@ abstract class Scanner
      *
      * @param ResultCollector $collector
      * @return void
-     * @throws \Throwable If the Media Source can't be scanned
+     * @throws Throwable If the Media Source can't be scanned
      */
-    abstract public function scan(ResultCollector $collector);
+    abstract public function scan(ResultCollector $collector): void;
 
     /**
      * Scanner values that change the list of scanned files.
      *
      * @return array
      */
-    public function getFingerprint()
+    public function getFingerprint(): array
     {
         // The stored Media Source properties (i.e. bucket, base path) change the scanned files
         return [static::class, get_class($this->source), $this->source->get('properties')];

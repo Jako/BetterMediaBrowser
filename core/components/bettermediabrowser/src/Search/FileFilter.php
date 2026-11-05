@@ -21,34 +21,34 @@ use modX;
 class FileFilter
 {
     /** @var array */
-    protected $skipFiles = [];
+    protected array $skipFiles = [];
 
     /** @var array */
-    protected $allowedExtensions = [];
+    protected array $allowedExtensions = [];
 
     /** @var array */
-    protected $excludedFolders = [];
+    protected array $excludedFolders = [];
 
     /** @var array */
-    protected $excludedPatterns = [];
+    protected array $excludedPatterns = [];
 
     /** @var bool */
-    protected $canListDirectories = false;
+    protected bool $canListDirectories = false;
 
     /** @var bool */
-    protected $multibyte = false;
+    protected bool $multibyte = false;
 
     /** @var string */
-    protected $charset = 'UTF-8';
+    protected string $charset = 'UTF-8';
 
     /**
      * FileFilter constructor
      *
      * @param modX $modx
-     * @param modMediaSource $source An initialized Media Source
+     * @param modMediaSource|object $source An initialized Media Source
      * @param array $excludedFolders Glob patterns of excluded folders
      */
-    public function __construct($modx, $source, array $excludedFolders)
+    public function __construct(modX $modx, object $source, array $excludedFolders)
     {
         $this->excludedFolders = array_values(array_filter($excludedFolders, 'strlen'));
         foreach ($this->excludedFolders as $excludedFolder) {
@@ -82,7 +82,7 @@ class FileFilter
      *
      * @return bool
      */
-    public function canListDirectories()
+    public function canListDirectories(): bool
     {
         return $this->canListDirectories;
     }
@@ -95,7 +95,7 @@ class FileFilter
      * @param string $fullPath
      * @return bool
      */
-    public function isSkipped($name, $relativePath, $fullPath = '')
+    public function isSkipped(string $name, string $relativePath, string $fullPath = ''): bool
     {
         return isset($this->skipFiles[$name])
             || isset($this->skipFiles[$relativePath])
@@ -108,7 +108,7 @@ class FileFilter
      * @param string $name
      * @return bool
      */
-    public function isAllowedExtension($name)
+    public function isAllowedExtension(string $name): bool
     {
         if (empty($this->allowedExtensions)) {
             return true;
@@ -124,7 +124,7 @@ class FileFilter
      * @param string $path Directory path with trailing slash
      * @return bool
      */
-    public function isExcluded($path)
+    public function isExcluded(string $path): bool
     {
         foreach ($this->excludedPatterns as $excludedPattern) {
             if (preg_match($excludedPattern, $path)) {
@@ -139,7 +139,7 @@ class FileFilter
      *
      * @return array
      */
-    public function getFingerprint()
+    public function getFingerprint(): array
     {
         return [
             array_keys($this->allowedExtensions),
@@ -162,7 +162,7 @@ class FileFilter
      * @param bool $ignoreCase
      * @return string Empty for an empty pattern
      */
-    public static function globToRegex($pattern, $ignoreCase = false)
+    public static function globToRegex(string $pattern, bool $ignoreCase = false): string
     {
         $pattern = ltrim(str_replace('\\', '/', trim($pattern)), '/');
         if ($pattern === '') {

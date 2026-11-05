@@ -10,7 +10,7 @@ use Visions\BetterMediaBrowser\Plugins\Plugin;
 
 class OnManagerPageBeforeRender extends Plugin
 {
-    public function process()
+    public function process(): void
     {
         if ($this->bettermediabrowser->getOption('enabled') && $this->modx->user && $this->modx->user->hasSessionContext('mgr')) {
             $assetsUrl = $this->bettermediabrowser->getOption('assetsUrl');
@@ -58,10 +58,10 @@ class OnManagerPageBeforeRender extends Plugin
      *
      * @return array
      */
-    protected function getClientConfig()
+    protected function getClientConfig(): array
     {
         $config = [];
-        foreach (['version', 'assetsUrl', 'connectorUrl', 'debug', 'modxversion', 'drag_drop_enabled', 'search_enabled'] as $key) {
+        foreach (['version', 'assetsUrl', 'connectorUrl', 'debug', 'modxversion', 'drag_drop_enabled', 'search_enabled', 'search_min_length'] as $key) {
             $config[$key] = $this->bettermediabrowser->getOption($key);
         }
         return $config;

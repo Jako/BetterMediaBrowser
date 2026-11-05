@@ -18,16 +18,16 @@ namespace Visions\BetterMediaBrowser\Search;
 class ResultCollector
 {
     /** @var string|null */
-    protected $query;
+    protected ?string $query;
 
     /** @var int */
-    protected $limit;
+    protected int $limit;
 
     /** @var bool */
-    protected $multibyte;
+    protected bool $multibyte;
 
     /** @var array */
-    protected $results = [];
+    protected array $results = [];
 
     /**
      * ResultCollector constructor
@@ -35,7 +35,7 @@ class ResultCollector
      * @param string|null $query Null collects all files
      * @param int $limit
      */
-    public function __construct($query, $limit)
+    public function __construct(?string $query, int $limit)
     {
         $this->query = $query;
         $this->limit = $limit;
@@ -49,7 +49,7 @@ class ResultCollector
      * @param string $relativePath Normalized path relative to the Media Source base path
      * @return void
      */
-    public function add($filename, $relativePath)
+    public function add(string $filename, string $relativePath): void
     {
         if ($this->query !== null && !$this->matches($filename)) {
             return;
@@ -62,7 +62,7 @@ class ResultCollector
      *
      * @return bool
      */
-    public function isFull()
+    public function isFull(): bool
     {
         return count($this->results) >= $this->limit;
     }
@@ -70,7 +70,7 @@ class ResultCollector
     /**
      * @return array
      */
-    public function getResults()
+    public function getResults(): array
     {
         return $this->results;
     }
@@ -80,7 +80,7 @@ class ResultCollector
      *
      * @return void
      */
-    public function reset()
+    public function reset(): void
     {
         $this->results = [];
     }
@@ -90,7 +90,7 @@ class ResultCollector
      *
      * @return void
      */
-    public function sort()
+    public function sort(): void
     {
         usort($this->results, function ($a, $b) {
             return strcasecmp($a[1], $b[1]);
@@ -103,7 +103,7 @@ class ResultCollector
      * @param string $filename
      * @return bool
      */
-    protected function matches($filename)
+    protected function matches(string $filename): bool
     {
         if ($this->multibyte) {
             return mb_stripos($filename, $this->query, 0, 'UTF-8') !== false;

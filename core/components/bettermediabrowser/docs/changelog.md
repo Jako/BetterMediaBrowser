@@ -5,12 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.2.0
+## 1.2.0 – 2026-11-04
 
 ### Added
 
 - BetterMediaSource media source type, that extends the file system media source and clears its file search cache on each file change
+- Build the folder lists of the media browser up to 30 times faster in the BetterMediaSource media source in MODX 3
+- Search while typing in the file search window, if the media source has a file index
 - Cache the folder lists of the media browser in the BetterMediaSource media source (list_cache_lifetime system setting)
+- Clear media browser cache menu entry below the Clear Cache menu entry, that clears the BetterMediaBrowser cache of all media sources
+
+### Changed
+
+- Don't clear the BetterMediaBrowser cache when the MODX cache is cleared, use the Clear media browser cache menu entry instead
 
 ### Fixed
 

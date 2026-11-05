@@ -17,19 +17,19 @@ use Visions\BetterMediaBrowser\BetterMediaBrowser;
 abstract class Plugin
 {
     /** @var modX $modx */
-    protected $modx;
-    /** @var BetterMediaBrowser $bettermediabrowser */
-    protected $bettermediabrowser;
+    protected modX $modx;
+    /** @var BetterMediaBrowser|null $bettermediabrowser */
+    protected ?BetterMediaBrowser $bettermediabrowser = null;
     /** @var array $scriptProperties */
-    protected $scriptProperties;
+    protected array $scriptProperties;
 
     /**
      * Plugin constructor.
      *
-     * @param $modx
-     * @param $scriptProperties
+     * @param modX $modx
+     * @param array $scriptProperties
      */
-    public function __construct($modx, &$scriptProperties)
+    public function __construct(modX $modx, array &$scriptProperties)
     {
         $this->scriptProperties = &$scriptProperties;
         $this->modx =& $modx;
@@ -41,8 +41,10 @@ abstract class Plugin
 
     /**
      * Run the plugin event.
+     *
+     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $init = $this->init();
         if ($init !== true) {
@@ -57,7 +59,7 @@ abstract class Plugin
      *
      * @return bool
      */
-    public function init()
+    public function init(): bool
     {
         return true;
     }
@@ -65,7 +67,7 @@ abstract class Plugin
     /**
      * Process the plugin event code.
      *
-     * @return mixed
+     * @return void
      */
-    abstract public function process();
+    abstract public function process(): void;
 }

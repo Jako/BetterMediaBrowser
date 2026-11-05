@@ -21,8 +21,8 @@ set_time_limit(0);
 const PKG_NAME = 'BetterMediaBrowser';
 const PKG_NAME_LOWER = 'bettermediabrowser';
 const PKG_VERSION = '1.2.0';
-const PKG_RELEASE = 'b2';
-const PKG_AUTHOR = 'Chris Menzi/Thomas Jakobi';
+const PKG_RELEASE = 'pl';
+const PKG_AUTHOR = 'Chris Menzi, Thomas Jakobi';
 const PKG_DESCRIPTION = 'Media Browser Extensions for MODX';
 
 $root = dirname(__DIR__) . '/';
@@ -59,6 +59,7 @@ if ($isModx3 && class_exists('MODX\\Revolution\\Transport\\modPackageBuilder')) 
     $settingClass = 'MODX\Revolution\modSystemSetting';
     $pluginClass = 'MODX\\Revolution\\modPlugin';
     $pluginEventClass = 'MODX\\Revolution\\modPluginEvent';
+    $menuClass = 'MODX\\Revolution\\modMenu';
     $transportClass = class_exists('xPDO\\Transport\\xPDOTransport') ? 'xPDO\\Transport\\xPDOTransport' : 'xPDOTransport';
 } else {
     $builderClass = 'modPackageBuilder';
@@ -67,6 +68,7 @@ if ($isModx3 && class_exists('MODX\\Revolution\\Transport\\modPackageBuilder')) 
     $settingClass = 'modSystemSetting';
     $pluginClass = 'modPlugin';
     $pluginEventClass = 'modPluginEvent';
+    $menuClass = 'modMenu';
     $transportClass = 'xPDOTransport';
     $modx->loadClass('transport.modPackageBuilder', '', false, true);
 }
@@ -187,6 +189,25 @@ if ($hasResources) {
         $modx->log(xPDO::LOG_LEVEL_INFO, 'Packaged ' . count($resources) . ' resources');
     }
     unset($resources, $resource, $attributes);
+}
+
+/* Menus */
+if ($hasMenu) {
+    $menus = require_once $sources['data'] . 'transport.menus.php';
+    if (!is_array($menus)) {
+        $modx->log(xPDO::LOG_LEVEL_ERROR, 'transport.menus.php contains not an array');
+    } else {
+        foreach ($menus as $menu) {
+            $vehicle = $builder->createVehicle($menu, [
+                $UNIQUE_KEY => 'text',
+                $PRESERVE_KEYS => true,
+                $UPDATE_OBJECT => true,
+            ]);
+            $builder->putVehicle($vehicle);
+        }
+        $modx->log(xPDO::LOG_LEVEL_INFO, 'Packaged ' . count($menus) . ' menus');
+    }
+    unset($menus, $menu);
 }
 
 /* System settings */

@@ -20,7 +20,7 @@ class Path
      * @param bool $directory Add a trailing slash
      * @return string Empty for an invalid path
      */
-    public static function normalize($path, $directory = false)
+    public static function normalize($path, bool $directory = false): string
     {
         $path = (string)$path;
         for ($i = 0; $i < 3; $i++) {
@@ -56,7 +56,7 @@ class Path
      * @param string $path
      * @return string Parent directory with trailing slash or empty for the root
      */
-    public static function parent($path)
+    public static function parent(string $path): string
     {
         $path = rtrim($path, '/');
         $pos = strrpos($path, '/');

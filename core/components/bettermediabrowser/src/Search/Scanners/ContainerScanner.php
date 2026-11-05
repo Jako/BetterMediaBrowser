@@ -24,7 +24,7 @@ class ContainerScanner extends Scanner
      * @param ResultCollector $collector
      * @return void
      */
-    public function scan(ResultCollector $collector)
+    public function scan(ResultCollector $collector): void
     {
         $this->scanContainer($collector, '', 0);
     }
@@ -37,7 +37,7 @@ class ContainerScanner extends Scanner
      * @param int $depth
      * @return void
      */
-    protected function scanContainer(ResultCollector $collector, $path, $depth)
+    protected function scanContainer(ResultCollector $collector, string $path, int $depth): void
     {
         if ($collector->isFull() || $depth > self::MAX_DEPTH) {
             return;
@@ -75,9 +75,6 @@ class ContainerScanner extends Scanner
 
         foreach ($directories as $directoryPath) {
             $this->scanContainer($collector, $directoryPath, $depth + 1);
-            if ($collector->isFull()) {
-                return;
-            }
         }
     }
 
@@ -88,7 +85,7 @@ class ContainerScanner extends Scanner
      * @param string $parent
      * @return bool
      */
-    protected function isChildPath($path, $parent)
+    protected function isChildPath(string $path, string $parent): bool
     {
         if ($path === '' || $path === $parent) {
             return false;
@@ -102,7 +99,7 @@ class ContainerScanner extends Scanner
      * @param array $entry
      * @return bool
      */
-    protected function isDirectory(array $entry)
+    protected function isDirectory(array $entry): bool
     {
         $type = isset($entry['type']) ? strtolower((string)$entry['type']) : '';
         if (in_array($type, ['dir', 'directory', 'folder'], true)) {
@@ -117,7 +114,7 @@ class ContainerScanner extends Scanner
      * @param array $entry
      * @return string
      */
-    protected function getEntryPath(array $entry)
+    protected function getEntryPath(array $entry): string
     {
         $path = '';
         foreach (['pathRelative', 'path', 'id'] as $key) {
@@ -136,7 +133,7 @@ class ContainerScanner extends Scanner
      * @param array $entry
      * @return string
      */
-    protected function getEntryName(array $entry)
+    protected function getEntryName(array $entry): string
     {
         if (isset($entry['name']) && $entry['name'] !== '') {
             return (string)$entry['name'];

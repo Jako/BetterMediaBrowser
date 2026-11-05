@@ -33,33 +33,36 @@ class FileSearch
     const RESULTS_LIFETIME = 60;
 
     /** @var BetterMediaBrowser */
-    protected $bettermediabrowser;
+    protected BetterMediaBrowser $bettermediabrowser;
 
     /** @var SearchCache */
-    protected $cache;
+    protected SearchCache $cache;
 
     /** @var int */
-    protected $sourceId;
+    protected int $sourceId;
 
     /** @var FileFilter */
-    protected $filter;
+    protected FileFilter $filter;
 
     /** @var int */
-    protected $maxResults;
+    protected int $maxResults;
 
     /** @var Scanner[] Scanners in the order they are tried */
-    protected $scanners;
+    protected array $scanners;
+
+    /** @var bool Was the last search answered from the index? */
+    protected bool $indexed = false;
 
     /**
      * FileSearch constructor
      *
      * @param BetterMediaBrowser $bettermediabrowser
-     * @param modMediaSource $source An initialized Media Source
+     * @param modMediaSource|object $source An initialized Media Source
      * @param FileFilter $filter
      * @param int $maxResults
      * @param Scanner[]|null $scanners Null uses the fastest available scanners
      */
-    public function __construct(BetterMediaBrowser $bettermediabrowser, $source, FileFilter $filter, $maxResults, $scanners = null)
+    public function __construct(BetterMediaBrowser $bettermediabrowser, object $source, FileFilter $filter, int $maxResults, ?array $scanners = null)
     {
         $this->bettermediabrowser = $bettermediabrowser;
         $this->cache = $bettermediabrowser->getSearchCache();
@@ -72,11 +75,11 @@ class FileSearch
     /**
      * Get the scanners for a Media Source, the fastest first.
      *
-     * @param modMediaSource $source
+     * @param modMediaSource|object $source
      * @param FileFilter $filter
      * @return Scanner[]
      */
-    public static function getScanners($source, FileFilter $filter)
+    public static function getScanners(object $source, FileFilter $filter): array
     {
         $localScanner = LocalScanner::create($source, $filter);
         if ($localScanner) {
@@ -94,13 +97,15 @@ class FileSearch
      *
      * @param string $query
      * @return array Sorted results as [filename, path]
+     * @throws Throwable If the last scanner fails
      */
-    public function search($query)
+    public function search(string $query): array
     {
         $generation = $this->cache->getGeneration($this->sourceId);
 
         $index = $this->getIndex($generation);
-        if (is_array($index)) {
+        $this->indexed = is_array($index);
+        if ($this->indexed) {
             $collector = new ResultCollector($query, $this->maxResults);
             foreach ($index as $entry) {
                 $collector->add($entry[0], $entry[1]);
@@ -123,12 +128,24 @@ class FileSearch
     }
 
     /**
+     * Was the last search answered from the index of all files? Then the
+     * following searches are fast enough to search while typing.
+     *
+     * @return bool
+     */
+    public function isIndexed(): bool
+    {
+        return $this->indexed;
+    }
+
+    /**
      * Get the cached index of all files of the Media Source.
      *
      * @param string $generation
      * @return array|null Null, if the Media Source contains too many files
+     * @throws Throwable If the last scanner fails
      */
-    protected function getIndex($generation)
+    protected function getIndex(string $generation): ?array
     {
         $cacheKey = $this->getCacheKey('index', [$generation]);
         $index = $this->cache->get($cacheKey);
@@ -159,7 +176,7 @@ class FileSearch
      * @return void
      * @throws Throwable If the last scanner fails
      */
-    protected function scan(ResultCollector $collector)
+    protected function scan(ResultCollector $collector): void
     {
         $lastScanner = end($this->scanners);
         foreach ($this->scanners as $scanner) {
@@ -186,7 +203,7 @@ class FileSearch
      * @param array $values Additional values
      * @return string
      */
-    protected function getCacheKey($type, array $values)
+    protected function getCacheKey(string $type, array $values): string
     {
         return 'source_' . $this->sourceId . '_' . $type . '_' . md5(json_encode([
                 $this->scanners[0]->getFingerprint(),
