@@ -2,7 +2,9 @@
 
 **BetterMediaBrowser** extends the MODX browser with drag-and-drop functionality
 for moving one or more files within the tree, deleting/downloading multiple
-files, and searching for files in the currently active media source.
+files, and searching for files in the currently active media source. It also
+installs the BetterMediaSource media source type with faster and cached folder
+lists in the media browser.
 
 ## Features
 
@@ -15,7 +17,23 @@ files, and searching for files in the currently active media source.
 - Fast searches with a cached file index per media source, which is cleared automatically on file changes and with the Clear media browser cache menu entry
 - Display search results with thumbnails for images, file icons for other files and relative paths
 - A search hit opens the target folder in the file view, opens the folder in the directory tree, and sets the path when a file is selected
+- BetterMediaSource media source type with faster and cached folder lists in the media browser
 - Compatible with MODX 2.8.x and 3.x
+
+## BetterMediaSource
+
+BetterMediaBrowser installs the media source type _BetterMediaSource_. It works
+like the file system media source with the same properties, permissions and
+policies, and adds:
+
+- **Faster folder lists** (MODX 3): The media browser tree and file view are built up to 30 times faster.
+- **Cached folder lists**: The media browser tree and file view are cached per user, context and manager language. The lifetime is set with the `bettermediabrowser.list_cache_lifetime` system setting.
+- **Cache clearing in the media source**: The cache of the media source is cleared after each file change in the media source itself, even if the BetterMediaBrowser plugin is disabled or a file is changed by other code that does not fire the file manager events.
+
+To use it, change the type of an existing file system media source to
+_BetterMediaSource_ or create a new media source of this type. When
+BetterMediaBrowser is uninstalled, all BetterMediaSource media sources are
+converted back to file system media sources.
 
 ## Security
 
