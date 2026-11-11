@@ -17,7 +17,7 @@ lists in the media browser.
 - Fast searches with a cached file index per media source, which is cleared automatically on file changes and with the Clear media browser cache menu entry
 - Display search results with thumbnails for images, file icons for other files and relative paths
 - A search hit opens the target folder in the file view, opens the folder in the directory tree, and sets the path when a file is selected
-- BetterMediaSource media source type with faster and cached folder lists in the media browser
+- BetterMediaSource media source type with faster and cached folder lists in the media browser. Up to 30 times faster than the classic filesystem media source in MODX 3
 - Compatible with MODX 2.8.x and 3.x
 
 ## BetterMediaSource
