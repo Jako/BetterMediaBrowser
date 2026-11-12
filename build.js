@@ -142,7 +142,7 @@ async function taskBump() {
             replace: copyrightReplace
         }], 'copyright in');
     }
-    replaceInFile('core/components/bettermediabrowser/src/BetterMediaBrowser.php', [{
+    await replaceInFile('core/components/bettermediabrowser/src/BetterMediaBrowser.php', [{
         search: /version = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
         replace: `version = '${version}'`
     }], 'version in');
@@ -204,13 +204,13 @@ async function taskCopy() {
         ['LICENSE.md', 'core/components/bettermediabrowser/docs/license.md'],
         ['CHANGELOG.md', 'core/components/bettermediabrowser/docs/changelog.md'],
     ];
-    copyFiles.forEach(([source, destination]) => {
+    for (const [source, destination] of copyFiles) {
         if (source && destination) {
-            copyFile(source, destination);
+            await copyFile(source, destination);
         } else {
             console.warn('⚠ copyFiles: Invalid file pair detected.');
         }
-    });
+    }
 }
 
 async function taskScripts() {
