@@ -1,0 +1,120 @@
+{
+  "name": "BetterMediaBrowser",
+  "lowCaseName": "bettermediabrowser",
+  "description": "Media Browser Extensions for MODX",
+  "author": "Chris Menzi, Thomas Jakobi",
+  "version": "1.2.1-pl",
+  "package": {
+    "menus": [
+      {
+        "text": "bettermediabrowser.menu_clear_cache",
+        "description": "bettermediabrowser.menu_clear_cache_desc",
+        "action": "",
+        "handler": "MODx.Ajax.request({\n    url: (MODx.config['bettermediabrowser.assets_url'] || MODx.config.assets_url + 'components/bettermediabrowser/') + 'connector.php',\n    params: {\n        action: 'mgr/cache/clear'\n    },\n    listeners: {\n        success: {\n            fn: function (r) {\n                MODx.msg.status({\n                    title: _('success'),\n                    message: r.message,\n                    delay: 3\n                });\n            }\n        }\n    }\n});\nreturn false;",
+        "menuIndex": "1",
+        "permissions": "empty_cache",
+        "parent": "refresh_site"
+      }
+    ],
+    "elements": {
+      "plugins": [
+        {
+          "name": "BetterMediaBrowser",
+          "description": "Extend the MODX Media Browser.",
+          "file": "plugin.bettermediabrowser.php",
+          "events": [
+            "OnManagerPageBeforeRender",
+            "OnFileManagerUpload",
+            "OnFileManagerFileCreate",
+            "OnFileManagerFileRename",
+            "OnFileManagerFileRemove",
+            "OnFileManagerDirRename",
+            "OnFileManagerDirRemove",
+            "OnFileManagerMoveObject"
+          ]
+        }
+      ]
+    },
+    "systemSettings": [
+      {
+        "key": "enabled",
+        "type": "combo-boolean",
+        "area": "system",
+        "value": "1"
+      },
+      {
+        "key": "debug",
+        "type": "combo-boolean",
+        "area": "system",
+        "value": "0"
+      },
+      {
+        "key": "drag_drop_enabled",
+        "type": "combo-boolean",
+        "area": "system",
+        "value": "1"
+      },
+      {
+        "key": "search_enabled",
+        "type": "combo-boolean",
+        "area": "system",
+        "value": "1"
+      },
+      {
+        "key": "remember_last_folder",
+        "type": "combo-boolean",
+        "area": "system",
+        "value": "1"
+      },
+      {
+        "key": "search_min_length",
+        "type": "numberfield",
+        "area": "search",
+        "value": "2"
+      },
+      {
+        "key": "search_max_results",
+        "type": "numberfield",
+        "area": "search",
+        "value": "500"
+      },
+      {
+        "key": "excluded_folders",
+        "type": "textfield",
+        "area": "search",
+        "value": ".*/,_*/,core/,components/,connectors/,manager/"
+      },
+      {
+        "key": "list_cache_lifetime",
+        "type": "numberfield",
+        "area": "mediasource",
+        "value": "300"
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": "php",
+      "version": ">=7.4"
+    },
+    {
+      "name": "modx",
+      "version": ">=2.8"
+    }
+  ],
+  "build": {
+    "readme": "docs/readme.md",
+    "license": "docs/license.md",
+    "changelog": "docs/changelog.md",
+    "setupOptions": {
+      "source": "setup.options.php"
+    },
+    "resolver": {
+      "after": [
+        "resolve.cleanup.php",
+        "resolve.mediasource.php",
+        "resolve.treehillstudio.php"
+      ]
+    }
+  }
+}

@@ -40,10 +40,16 @@
         }
         return null;
     }
+    function isEnabled() {
+        return !BetterMediaBrowser.config || BetterMediaBrowser.config.remember_last_folder !== false;
+    }
     function lastFolderStorageKey(view, source) {
         return 'bettermediabrowser.lastFolder.' + encodeURIComponent(getWctx(view)) + '.' + encodeURIComponent(String(source == null ? '' : source));
     }
     function rememberLastFolder(view, source, directory) {
+        if (!isEnabled()) {
+            return;
+        }
         var provider = getStateProvider();
         if (!provider || source === null || source === '') {
             return;
@@ -64,6 +70,9 @@
         }
     }
     function readLastFolder(view, source) {
+        if (!isEnabled()) {
+            return '';
+        }
         var provider = getStateProvider();
         if (!provider || source === null || source === '') {
             return '';

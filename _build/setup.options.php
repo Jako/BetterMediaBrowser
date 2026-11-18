@@ -2,7 +2,7 @@
 /**
  * Setup options
  *
- * @package ajaxupload
+ * @package bettermediabrowser
  * @subpackage build
  *
  * @var array $options

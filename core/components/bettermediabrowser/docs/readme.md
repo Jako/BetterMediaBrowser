@@ -11,7 +11,7 @@ lists in the media browser.
 - Move files directly from the right-hand media view to a folder in the left-hand tree
 - Move multiple selected files to another folder at once using drag-and-drop
 - Select multiple files using Ctrl/Cmd or Shift and download or delete them all at once
-- Remember the most recently used subfolders of a media source and restore them the next time the source is opened
+- Remember the most recently used subfolders of a media source and restore them the next time the source is opened (can be disabled with a system setting)
 - Keep the toolbar and the media source selector of the directory tree visible while scrolling the tree
 - Search using a search icon in the media source’s toolbar
 - Fast searches with a cached file index per media source, which is cleared automatically on file changes and with the Clear media browser cache menu entry
@@ -34,7 +34,7 @@ To use it, change the type of an existing file system media source to
 _BetterMediaSource_ or create a new media source of this type. When
 BetterMediaBrowser is uninstalled, all BetterMediaSource media sources are
 converted back to file system media sources.
-a
+
 ## Security
 
 The search performs the following checks on the server side:
@@ -55,16 +55,17 @@ MODX Package Management
 
 _BetterMediaBrowser_ contains some _system settings_ in the `bettermediabrowser` namespace.
 
-| Key                                    | Name                | Description                                                                                                          | Default                                          |
-|----------------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
-| bettermediabrowser.debug               | Debug               | Log debug information in the MODX error log.                                                                         | No                                               |
-| bettermediabrowser.enabled             | Enabled             | Enable the BetterMediaBrowser extension.                                                                             | Yes                                              |
-| bettermediabrowser.drag_drop_enabled   | Enable Drag & Drop  | Enable drag-and-drop for files in the MODX Browser.                                                                  | Yes                                              |
-| bettermediabrowser.search_enabled      | Enable Search       | Enable the BetterMediaBrowser file search.                                                                           | Yes                                              |
-| bettermediabrowser.search_min_length   | Min Length          | Minimum length of the search string before a search is executed.                                                     | 2                                                |
-| bettermediabrowser.search_max_results  | Max Results         | Maximum count of files in the search results.                                                                        | 500                                              |
-| bettermediabrowser.excluded_folders    | Excluded Folders    | Comma-separated list of folders to be excluded from the search results.                                              | `.*/,_*/,core/,components/,connectors/,manager/` |
-| bettermediabrowser.list_cache_lifetime | List Cache Lifetime | Seconds, that the BetterMediaSource media source caches the folder lists of the media browser. 0 disables the cache. | 300                                              |
+| Key                                     | Name                 | Description                                                                                                          | Default                                          |
+|-----------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| bettermediabrowser.debug                | Debug                | Log debug information in the MODX error log.                                                                         | No                                               |
+| bettermediabrowser.enabled              | Enabled              | Enable the BetterMediaBrowser extension.                                                                             | Yes                                              |
+| bettermediabrowser.drag_drop_enabled    | Enable Drag & Drop   | Enable drag-and-drop for files in the MODX Browser.                                                                  | Yes                                              |
+| bettermediabrowser.search_enabled       | Enable Search        | Enable the BetterMediaBrowser file search.                                                                           | Yes                                              |
+| bettermediabrowser.remember_last_folder | Remember Last Folder | Remember the last opened folder of each media source in the MODX Browser and open it again.                          | Yes                                              |
+| bettermediabrowser.search_min_length    | Min Length           | Minimum length of the search string before a search is executed.                                                     | 2                                                |
+| bettermediabrowser.search_max_results   | Max Results          | Maximum count of files in the search results.                                                                        | 500                                              |
+| bettermediabrowser.excluded_folders     | Excluded Folders     | Comma-separated list of folders to be excluded from the search results.                                              | `.*/,_*/,core/,components/,connectors/,manager/` |
+| bettermediabrowser.list_cache_lifetime  | List Cache Lifetime  | Seconds, that the BetterMediaSource media source caches the folder lists of the media browser. 0 disables the cache. | 300                                              |
 
 ## License
 

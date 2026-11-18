@@ -6,9 +6,19 @@
  * @subpackage model
  */
 
-require_once MODX_CORE_PATH . 'model/modx/sources/modmediasource.class.php';
-require_once MODX_CORE_PATH . 'model/modx/sources/modfilemediasource.class.php';
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+
+// Let xPDO load the parent class with the core sources package. Including the
+// base class file directly causes a fatal error, when a modFileMediaSource
+// object is created afterwards, because xPDO skips loading the database
+// specific class, if the base class already exists. This file is included by
+// xPDO::_loadClass(), so $this is the xPDO instance.
+/** @var modX $xpdo */
+$xpdo = (isset($this) && $this instanceof xPDO) ? $this : ($GLOBALS['modx'] ?? null);
+if ($xpdo instanceof xPDO) {
+    $xpdo->addPackage('sources', MODX_CORE_PATH . 'model/modx/');
+    $xpdo->loadClass('sources.modFileMediaSource');
+}
 
 use Visions\BetterMediaBrowser\Model\ListCacheTrait;
 use Visions\BetterMediaBrowser\Model\SearchCacheTrait;

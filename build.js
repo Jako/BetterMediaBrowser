@@ -1,6 +1,5 @@
 const fs = require('fs').promises;
 const path = require('path');
-const runner = require('child_process');
 const { minify } = require('terser');
 const sass = require('sass');
 const postcss = require('postcss');
@@ -171,20 +170,6 @@ async function taskBump() {
         search: /[*-] PHP (v)?\d.\d.*/g,
         replace: '* PHP ' + phpversion + '+'
     }], 'requirements in');
-    await replaceInFile('_build/build.transport.php', [{
-        search: /PKG_VERSION = '\d+\.\d+\.\d+-?[0-9a-z]*'/ig,
-        replace: `PKG_VERSION = '${versionNumber}'`
-    }, {
-        search: /PKG_RELEASE = '.*?'/ig,
-        replace: `PKG_RELEASE = '${versionRelease}'`
-    }], 'version in');
-    await replaceInFile('_build/build.transport.php', [{
-        search: /'php' => '>=\d+(\.\d+){1,2}'/ig,
-        replace: `'php' => '>=${phpversion}'`
-    }, {
-        search: /'modx' => '>=\d+(\.\d+){1,2}'/ig,
-        replace: `'modx' => '>=${modxversion}'`
-    }], 'requirements in');
     await replaceInFile('core/components/bettermediabrowser/composer.json', [{
         search: /"php": "\d.\d.*?"/g,
         replace: '"php": "' + phpversion + '"'
@@ -192,10 +177,23 @@ async function taskBump() {
         search: /"php": ">=\d.\d.*?"/g,
         replace: '"php": ">=' + phpversion + '"'
     }], 'requirements in');
-    await replaceInFile('core/components/bettermediabrowser/composer.json', [{
-        search: /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
-        replace: `"version": "${version}"`
-    }], 'version in');
+    await replaceInFile('_build/config.json', [{
+        search: /("name": "php",\s*"version": ")>=?[^"]*(")/g,
+        replace: '$1>=' + phpversion + '$2'
+    }, {
+        search: /("name": "modx",\s*"version": ")>=?[^"]*(")/g,
+        replace: '$1>=' + modxversion + '$2'
+    }], 'requirements in');
+    const buildFiles = [
+        '_build/config.json',
+        'core/components/bettermediabrowser/composer.json',
+    ];
+    for (const file of buildFiles) {
+        await replaceInFile(file, [{
+            search: /"version": "\d+\.\d+\.\d+-?[0-9a-z]*"/ig,
+            replace: `"version": "${version}"`
+        }], 'version in');
+    }
 }
 
 async function taskCopy() {
@@ -243,17 +241,6 @@ async function taskImages() {
     await copyFolderRecursive('src/img', 'assets/components/bettermediabrowser/img', isImage);
 }
 
-async function taskTransport() {
-    console.log('Creating transport package...');
-    const phpScriptPath = path.resolve(__dirname, '_build/build.transport.php');
-    runner.exec('php ' + phpScriptPath, function (err, phpResponse, stderr) {
-        if (err) {
-            console.log(err);
-        }
-        console.log(phpResponse);
-    });
-}
-
 const action = process.argv[2];
 if (action === 'bump') {
     taskBump();
@@ -265,16 +252,13 @@ if (action === 'bump') {
     taskSass();
 } else if (action === 'images') {
     taskImages();
-} else if (action === 'transport') {
-    taskTransport();
 } else {
     // Default: Beides ausführen
     taskBump()
         .then(() => taskScripts())
         .then(() => taskSass())
         .then(() => taskCopy())
-        .then(() => taskImages())
-        .then(() => taskTransport());
+        .then(() => taskImages());
 }
 
 console.log('Done!');

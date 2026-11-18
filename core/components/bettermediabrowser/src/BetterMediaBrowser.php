@@ -43,7 +43,7 @@ class BetterMediaBrowser
      * The version
      * @var string $version
      */
-    public string $version = '1.2.0';
+    public string $version = '1.2.1-pl';
 
     /**
      * The class options
@@ -146,6 +146,7 @@ class BetterMediaBrowser
             'enabled' => $this->getBooleanOption('enabled', [], true),
             'drag_drop_enabled' => $this->getBooleanOption('drag_drop_enabled', [], true),
             'search_enabled' => $this->getBooleanOption('search_enabled', [], true),
+            'remember_last_folder' => $this->getBooleanOption('remember_last_folder', [], true),
             'search_min_length' => (int)$this->getOption('search_min_length', $options, 2),
             'search_max_results' => (int)$this->getOption('search_max_results', $options, 500),
             'excluded_folders' => $this->getExplodedOption('excluded_folders', $options, '.*/,_*/,core/,components/,connectors/,manager/'),

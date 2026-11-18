@@ -61,7 +61,7 @@ class OnManagerPageBeforeRender extends Plugin
     protected function getClientConfig(): array
     {
         $config = [];
-        foreach (['version', 'assetsUrl', 'connectorUrl', 'debug', 'modxversion', 'drag_drop_enabled', 'search_enabled', 'search_min_length'] as $key) {
+        foreach (['version', 'assetsUrl', 'connectorUrl', 'debug', 'modxversion', 'drag_drop_enabled', 'search_enabled', 'search_min_length', 'remember_last_folder'] as $key) {
             $config[$key] = $this->bettermediabrowser->getOption($key);
         }
         return $config;

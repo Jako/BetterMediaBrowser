@@ -4,7 +4,7 @@
   "description": "Media Browser Extensions for MODX",
   "author": "Chris Menzi <christoph.menzi@visions.ch>, Thomas Jakobi <office@treehillstudio.com>",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1-pl",
   "phpversion": "7.4",
   "modxversion": "2.8",
   "startYear": "2026",
@@ -13,8 +13,7 @@
     "build:bump": "node build.js bump",
     "build:scripts": "node build.js scripts",
     "build:sass": "node build.js sass",
-    "build:images": "node build.js images",
-    "build:transport": "node build.js transport"
+    "build:images": "node build.js images"
   },
   "devDependencies": {
     "autoprefixer": "^10.6.1",

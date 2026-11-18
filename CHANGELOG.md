@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.1 – 2026-11-18
+
+### Added
+
+- Disable remembering the last opened folder of a media source with the remember_last_folder system setting
+
+### Fixed
+
+- Fatal error "Class modFileMediaSource_mysql not found" in MODX 2, when a file system media source is created after a BetterMediaSource
+
 ## 1.2.0 – 2026-11-04
 
 ### Added
